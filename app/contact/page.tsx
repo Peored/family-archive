@@ -98,7 +98,7 @@ export default function Contact() {
               <div className="flex items-center gap-3">
                 <span>📱</span>
                 <button
-                  onClick={() => window.open('https://wa.me/234906206611', '_blank')}
+                  onClick={() => window.open('https://wa.me/2349062056611', '_blank')}
                   className="text-[#9A8A6A] text-sm tracking-widest bg-transparent border-none cursor-pointer"
                 >
                   WHATSAPP
