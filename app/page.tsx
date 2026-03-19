@@ -23,17 +23,13 @@ export default function Home() {
   const { toast, showToast } = useToast()
 
   useEffect(() => {
-    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setLoading(false)
     })
-
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
     })
-
     return () => subscription.unsubscribe()
   }, [])
 
@@ -143,7 +139,6 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-3">
-            {/* Mobile hamburger */}
             <button
               className="md:hidden text-[#C9A84C] text-2xl leading-none"
               onClick={() => setMenuOpen(!menuOpen)}>
@@ -301,7 +296,11 @@ function Dashboard() {
                   ? <img src={m.photo_url} className="w-10 h-10 object-cover border border-[#3A3020]"/>
                   : <div className="w-10 h-10 bg-[#16120C] flex items-center justify-center text-lg border border-[#2A2218]">👤</div>}
                 <div>
-                  <p className="text-[#F0E6D0] text-sm" style={{fontFamily:'Georgia,serif'}}>{m.name}</p>
+                  <p
+                    className="text-[#F0E6D0] text-sm"
+                    style={{fontFamily:'Georgia,serif'}}>
+                    {m.name}
+                  </p>
                   <p className="text-[#5A4E38] text-xs italic">
                     {m.generation ? m.generation + ' · ' : ''}{m.birth_year || '?'}
                   </p>
@@ -318,9 +317,17 @@ function Dashboard() {
           {!stories.length
             ? <p className="text-[#5A4E38] text-sm italic">No stories yet</p>
             : stories.map(s => (
-              <div key={s.id} className="mb-3 border border-[#2A2218] p-3 bg-[#110E08]">
-                <p className="text-[#F0E6D0] text-sm mb-1" style={{fontFamily:'Georgia,serif'}}>{s.title}</p>
-                <p className="text-[#5A4E38] text-xs italic">By {s.author || 'Anonymous'}</p>
+              <div
+                key={s.id}
+                className="mb-3 border border-[#2A2218] p-3 bg-[#110E08]">
+                <p
+                  className="text-[#F0E6D0] text-sm mb-1"
+                  style={{fontFamily:'Georgia,serif'}}>
+                  {s.title}
+                </p>
+                <p className="text-[#5A4E38] text-xs italic">
+                  By {s.author || 'Anonymous'}
+                </p>
               </div>
             ))
           }
