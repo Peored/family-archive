@@ -25,6 +25,10 @@ export default function Contact() {
     }
   }
 
+  const linkStyle = { color: '#9A8A6A' }
+  const goldStyle = { color: '#C9A84C' }
+  const dimStyle = { color: '#5A4E38' }
+
   return (
     <main className="min-h-screen bg-[#0A0804] text-[#F0E6D0]">
       <header className="border-b border-[#3A3020] px-6 py-4 flex items-center justify-between">
@@ -34,14 +38,13 @@ export default function Contact() {
         </div>
         <Link
           href="/"
-          className="text-[#5A4E38] text-xs tracking-widest hover:text-[#9A8A6A] border border-[#2A2218] px-3 py-1 transition-all">
+          className="text-[#5A4E38] text-xs tracking-widest border border-[#2A2218] px-3 py-1 transition-all hover:opacity-75">
           ENTER ARCHIVE
         </Link>
       </header>
 
       <div className="max-w-5xl mx-auto px-4 md:px-8 py-16">
 
-        {/* Hero */}
         <div className="text-center mb-16">
           <p className="text-[#C9A84C] text-xs tracking-widest mb-4">✦ GET IN TOUCH ✦</p>
           <h1
@@ -55,8 +58,6 @@ export default function Contact() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-
-          {/* Left */}
           <div>
             <p className="text-[#C9A84C] text-xs tracking-widest mb-6 border-b border-[#2A2218] pb-3">
               ✦ WHAT YOU GET
@@ -80,7 +81,6 @@ export default function Contact() {
               </div>
             ))}
 
-            {/* Pricing */}
             <div className="border border-[#3A3020] p-6 mt-8 relative">
               <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-[#C9A84C]"></div>
               <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-[#C9A84C]"></div>
@@ -103,41 +103,42 @@ export default function Contact() {
               </p>
             </div>
 
-            {/* Contact details */}
             <div className="mt-8 space-y-4">
               <p className="text-[#C9A84C] text-xs tracking-widest mb-4">✦ REACH ME DIRECTLY</p>
-
-              
-                href="https://wa.me/2349062056611"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{color:'#9A8A6A'}}
-                className="flex items-center gap-3 transition-all hover:opacity-70">
+              <div className="flex items-center gap-3">
                 <span>📱</span>
-                <span className="text-sm tracking-widest">WHATSAPP</span>
-              </a>
-
-              
-                href="mailto:adewole404@gmail.com"
-                style={{color:'#9A8A6A'}}
-                className="flex items-center gap-3 transition-all hover:opacity-70">
+                
+                  href="https://wa.me/2349062056611"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={linkStyle}
+                  className="text-sm tracking-widest hover:opacity-75 transition-all">
+                  WHATSAPP
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
                 <span>📧</span>
-                <span className="text-sm tracking-widest">ADEWOLE404@GMAIL.COM</span>
-              </a>
-
-              
-                href="https://twitter.com/alaric_121"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{color:'#9A8A6A'}}
-                className="flex items-center gap-3 transition-all hover:opacity-70">
+                
+                  href="mailto:adewole404@gmail.com"
+                  style={linkStyle}
+                  className="text-sm tracking-widest hover:opacity-75 transition-all">
+                  ADEWOLE404@GMAIL.COM
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
                 <span>𝕏</span>
-                <span className="text-sm tracking-widest">@alaric_121</span>
-              </a>
+                
+                  href="https://twitter.com/alaric_121"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={linkStyle}
+                  className="text-sm tracking-widest hover:opacity-75 transition-all">
+                  @alaric_121
+                </a>
+              </div>
             </div>
           </div>
 
-          {/* Right — Form */}
           <div>
             <p className="text-[#C9A84C] text-xs tracking-widest mb-6 border-b border-[#2A2218] pb-3">
               ✦ SEND A MESSAGE
@@ -158,7 +159,7 @@ export default function Contact() {
                 </p>
                 <button
                   onClick={() => { setSent(false); setForm({ name:'', email:'', whatsapp:'', message:'' }) }}
-                  className="mt-6 border border-[#3A3020] text-[#5A4E38] px-6 py-2 text-xs tracking-widest transition-all hover:border-[#C9A84C] hover:text-[#C9A84C]">
+                  className="mt-6 border border-[#3A3020] text-[#5A4E38] px-6 py-2 text-xs tracking-widest hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all">
                   SEND ANOTHER MESSAGE
                 </button>
               </div>
@@ -188,7 +189,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <label className="text-[#C9A84C] text-xs tracking-widest block mb-2">
-                      WHATSAPP <span className="text-[#3A3020]">(optional)</span>
+                      WHATSAPP NUMBER <span className="text-[#3A3020]">(optional)</span>
                     </label>
                     <input
                       className="w-full bg-[#0A0804] border border-[#3A3020] text-[#F0E6D0] px-4 py-3 text-sm outline-none focus:border-[#C9A84C] transition-colors"
@@ -207,16 +208,13 @@ export default function Contact() {
                       onChange={e => { setForm({...form, message: e.target.value}); setError('') }}
                     />
                   </div>
-
                   {error && <p className="text-red-400 text-xs">✗ {error}</p>}
-
                   <button
                     onClick={submit}
                     disabled={saving}
                     className="w-full bg-gradient-to-r from-[#8B6914] to-[#C9A84C] text-[#0A0804] py-4 text-xs tracking-widest hover:from-[#C9A84C] hover:to-[#E8C97A] transition-all disabled:opacity-50">
                     {saving ? 'SENDING...' : 'SEND MESSAGE'}
                   </button>
-
                   <p className="text-[#3A3020] text-xs text-center tracking-widest">
                     I respond within 24 hours
                   </p>
@@ -226,17 +224,12 @@ export default function Contact() {
           </div>
         </div>
 
-        {/* Demo link */}
         <div className="text-center mt-16 border-t border-[#2A2218] pt-10">
           <p className="text-[#5A4E38] text-xs tracking-widest mb-3">WANT TO SEE A LIVE DEMO FIRST?</p>
-          <Link
-            href="/"
-            style={{color:'#C9A84C'}}
-            className="text-sm tracking-widest border-b border-[#8B6914] pb-1 hover:opacity-70 transition-all">
+          <a href="/" style={goldStyle} className="text-sm tracking-widest border-b border-[#8B6914] pb-1 hover:opacity-75 transition-all">
             VIEW DEMO ARCHIVE
-          </Link>
+          </a>
         </div>
-
       </div>
     </main>
   )

@@ -34,6 +34,8 @@ export default function Messages() {
     fetchMessages()
   }
 
+  const goldStyle = { color: '#C9A84C' }
+
   if (loading) return (
     <main className="min-h-screen bg-[#0A0804] flex items-center justify-center">
       <p className="text-[#C9A84C] text-xs tracking-widest">LOADING...</p>
@@ -47,9 +49,7 @@ export default function Messages() {
           <p className="text-[#C9A84C] text-xs tracking-widest">THE ARCHIVE</p>
           <p className="text-[#5A4E38] text-xs tracking-widest">Adewumi Legacy</p>
         </div>
-        <Link
-          href="/"
-          className="text-[#5A4E38] text-xs tracking-widest hover:text-[#9A8A6A] transition-colors">
+        <Link href="/" className="text-[#5A4E38] text-xs tracking-widest hover:text-[#9A8A6A] transition-colors">
           BACK TO ARCHIVE
         </Link>
       </header>
@@ -69,18 +69,13 @@ export default function Messages() {
         {!messages.length ? (
           <div className="text-center py-24 text-[#5A4E38]">
             <p className="text-5xl mb-4">📧</p>
-            <p className="text-2xl italic mb-2" style={{fontFamily:'Georgia,serif'}}>
-              No messages yet
-            </p>
-            <p className="text-xs tracking-widest">
-              SHARE YOUR CONTACT PAGE TO START RECEIVING INQUIRIES
-            </p>
-            <Link
-              href="/contact"
-              style={{color:'#C9A84C'}}
-              className="inline-block mt-6 text-xs tracking-widest border-b border-[#8B6914] pb-1 hover:opacity-70 transition-all">
-              VIEW CONTACT PAGE
-            </Link>
+            <p className="text-2xl italic mb-2" style={{fontFamily:'Georgia,serif'}}>No messages yet</p>
+            <p className="text-xs tracking-widest">SHARE YOUR CONTACT PAGE TO START RECEIVING INQUIRIES</p>
+            <div className="mt-6">
+              <a href="/contact" style={goldStyle} className="text-xs tracking-widest border-b border-[#8B6914] pb-1 hover:opacity-75 transition-all">
+                VIEW CONTACT PAGE
+              </a>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
@@ -91,13 +86,9 @@ export default function Messages() {
                 className="border border-[#2A2218] bg-[#110E08] p-6 cursor-pointer hover:border-[#8B6914] transition-all">
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <p className="text-[#F0E6D0] text-lg" style={{fontFamily:'Georgia,serif'}}>
-                      {m.name}
-                    </p>
+                    <p className="text-[#F0E6D0] text-lg" style={{fontFamily:'Georgia,serif'}}>{m.name}</p>
                     <p className="text-[#C9A84C] text-xs tracking-widest mt-1">{m.email}</p>
-                    {m.whatsapp && (
-                      <p className="text-[#5A4E38] text-xs mt-1">📱 {m.whatsapp}</p>
-                    )}
+                    {m.whatsapp && <p className="text-[#5A4E38] text-xs mt-1">📱 {m.whatsapp}</p>}
                   </div>
                   <p className="text-[#5A4E38] text-xs italic">
                     {new Date(m.created_at).toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'})}
@@ -112,7 +103,6 @@ export default function Messages() {
         )}
       </div>
 
-      {/* Message Modal */}
       {selected && (
         <div
           className="fixed inset-0 bg-black/92 z-50 flex items-center justify-center p-4"
@@ -126,38 +116,37 @@ export default function Messages() {
             <div className="flex justify-between items-start p-6 border-b border-[#2A2218]">
               <div>
                 <p className="text-[#C9A84C] text-xs tracking-widest mb-1">✦ MESSAGE FROM</p>
-                <h2 className="text-2xl font-light" style={{fontFamily:'Georgia,serif'}}>
-                  {selected.name}
-                </h2>
+                <h2 className="text-2xl font-light" style={{fontFamily:'Georgia,serif'}}>{selected.name}</h2>
               </div>
               <button
                 onClick={() => setSelected(null)}
                 className="text-[#5A4E38] text-3xl hover:text-[#C9A84C] transition-colors ml-4 flex-shrink-0 leading-none">
-                ×
+                x
               </button>
             </div>
             <div className="p-6">
               <div className="space-y-3 mb-6">
                 <div>
                   <p className="text-[#8B6914] text-xs tracking-widest mb-1">EMAIL</p>
-                  
-                    href={`mailto:${selected.email}`}
-                    style={{color:'#C9A84C'}}
-                    className="text-sm hover:opacity-70 transition-all">
-                    {selected.email}
-                  </a>
+                  <div>
+                    <a href={`mailto:${selected.email}`} style={goldStyle} className="text-sm hover:opacity-75 transition-all">
+                      {selected.email}
+                    </a>
+                  </div>
                 </div>
                 {selected.whatsapp && (
                   <div>
                     <p className="text-[#8B6914] text-xs tracking-widest mb-1">WHATSAPP</p>
-                    
-                      href={`https://wa.me/${selected.whatsapp.replace(/\D/g,'')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{color:'#C9A84C'}}
-                      className="text-sm hover:opacity-70 transition-all">
-                      {selected.whatsapp}
-                    </a>
+                    <div>
+                      
+                        href={`https://wa.me/${selected.whatsapp.replace(/\D/g,'')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={goldStyle}
+                        className="text-sm hover:opacity-75 transition-all">
+                        {selected.whatsapp}
+                      </a>
+                    </div>
                   </div>
                 )}
                 <div>
@@ -167,12 +156,8 @@ export default function Messages() {
                   </p>
                 </div>
               </div>
-              <p className="text-[#C9A84C] text-xs tracking-widest mb-3 border-b border-[#2A2218] pb-3">
-                ✦ MESSAGE
-              </p>
-              <p
-                className="text-[#9A8A6A] leading-loose italic"
-                style={{fontFamily:'Georgia,serif'}}>
+              <p className="text-[#C9A84C] text-xs tracking-widest mb-3 border-b border-[#2A2218] pb-3">✦ MESSAGE</p>
+              <p className="text-[#9A8A6A] leading-loose italic" style={{fontFamily:'Georgia,serif'}}>
                 {selected.message}
               </p>
               <div className="flex justify-between mt-8 pt-4 border-t border-[#2A2218]">

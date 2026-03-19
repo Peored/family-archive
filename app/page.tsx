@@ -126,12 +126,14 @@ export default function Home() {
         <p className="text-[#3A3020] text-xs mt-6 tracking-widest">
           ACCESS BY INVITATION ONLY
         </p>
-        
-          href="/contact"
-          style={{color:'#5A4E38'}}
-          className="block text-xs mt-3 tracking-widest hover:opacity-70 transition-all">
-          INTERESTED IN BUILDING ONE?
-        </a>
+        <div className="mt-3">
+          
+            href="/contact"
+            style={{color:'#5A4E38'}}
+            className="text-xs tracking-widest hover:opacity-75 transition-all">
+            INTERESTED IN BUILDING ONE?
+          </a>
+        </div>
       </div>
       <Toast toast={toast} />
     </main>
@@ -148,7 +150,6 @@ export default function Home() {
             <p className="text-[#5A4E38] text-xs tracking-widest">Adewumi Legacy</p>
           </div>
 
-          {/* Desktop nav */}
           <nav className="hidden md:flex gap-1 flex-wrap">
             {tabs.map(t => (
               <button
@@ -171,18 +172,22 @@ export default function Home() {
               {menuOpen ? '×' : '☰'}
             </button>
             <div className="hidden md:flex items-center gap-3">
-              
-                href="/contact"
-                style={{color:'#5A4E38'}}
-                className="text-xs tracking-widest hover:opacity-70 transition-all">
-                CONTACT
-              </a>
-              
-                href="/messages"
-                style={{color:'#5A4E38'}}
-                className="text-xs tracking-widest hover:opacity-70 transition-all">
-                MESSAGES
-              </a>
+              <div>
+                
+                  href="/contact"
+                  style={{color:'#5A4E38'}}
+                  className="text-xs tracking-widest hover:opacity-75 transition-all">
+                  CONTACT
+                </a>
+              </div>
+              <div>
+                
+                  href="/messages"
+                  style={{color:'#5A4E38'}}
+                  className="text-xs tracking-widest hover:opacity-75 transition-all">
+                  MESSAGES
+                </a>
+              </div>
               <p className="text-[#5A4E38] text-xs tracking-widest">
                 {session.user.email}
               </p>
@@ -195,7 +200,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Mobile dropdown */}
         {menuOpen && (
           <div className="md:hidden mt-4 border-t border-[#2A2218] pt-4 grid grid-cols-3 gap-2">
             {tabs.map(t => (
@@ -210,18 +214,22 @@ export default function Home() {
                 {t}
               </button>
             ))}
-            
-              href="/contact"
-              style={{color:'#5A4E38'}}
-              className="px-3 py-2 text-xs tracking-widest uppercase border border-[#2A2218] text-center hover:opacity-70">
-              CONTACT
-            </a>
-            
-              href="/messages"
-              style={{color:'#5A4E38'}}
-              className="px-3 py-2 text-xs tracking-widest uppercase border border-[#2A2218] text-center hover:opacity-70">
-              MESSAGES
-            </a>
+            <div>
+              
+                href="/contact"
+                style={{color:'#5A4E38'}}
+                className="block px-3 py-2 text-xs tracking-widest uppercase border border-[#2A2218] text-center hover:opacity-75 transition-all">
+                CONTACT
+              </a>
+            </div>
+            <div>
+              
+                href="/messages"
+                style={{color:'#5A4E38'}}
+                className="block px-3 py-2 text-xs tracking-widest uppercase border border-[#2A2218] text-center hover:opacity-75 transition-all">
+                MESSAGES
+              </a>
+            </div>
             <button
               onClick={logout}
               className="px-3 py-2 text-xs tracking-widest uppercase text-red-900 border border-[#2A2218] hover:text-red-400">
@@ -312,14 +320,18 @@ function Dashboard() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
         {stats.map(s => (
-          <div key={s.label} className="border border-[#2A2218] bg-[#110E08] p-6 text-center">
+          <div
+            key={s.label}
+            className="border border-[#2A2218] bg-[#110E08] p-6 text-center">
             <p className="text-3xl mb-3">{s.icon}</p>
             <p
               className="text-[#C9A84C] text-3xl font-light mb-1"
               style={{fontFamily:'Georgia,serif'}}>
               {s.value}
             </p>
-            <p className="text-[#5A4E38] text-xs tracking-widest">{s.label.toUpperCase()}</p>
+            <p className="text-[#5A4E38] text-xs tracking-widest">
+              {s.label.toUpperCase()}
+            </p>
           </div>
         ))}
       </div>
@@ -332,7 +344,9 @@ function Dashboard() {
           {!members.length
             ? <p className="text-[#5A4E38] text-sm italic">No members yet</p>
             : members.map(m => (
-              <div key={m.id} className="flex gap-3 items-center mb-3 border border-[#2A2218] p-3 bg-[#110E08]">
+              <div
+                key={m.id}
+                className="flex gap-3 items-center mb-3 border border-[#2A2218] p-3 bg-[#110E08]">
                 {m.photo_url
                   ? <img src={m.photo_url} className="w-10 h-10 object-cover border border-[#3A3020]"/>
                   : <div className="w-10 h-10 bg-[#16120C] flex items-center justify-center text-lg border border-[#2A2218]">👤</div>}
