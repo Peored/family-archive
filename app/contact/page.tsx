@@ -34,7 +34,7 @@ export default function Contact() {
         </div>
         <Link
           href="/"
-          className="text-[#5A4E38] text-xs tracking-widest hover:text-[#9A8A6A] border border-[#2A2218] px-3 py-1 hover:border-[#5A4E38] transition-all">
+          className="text-[#5A4E38] text-xs tracking-widest hover:text-[#9A8A6A] border border-[#2A2218] px-3 py-1 transition-all">
           ENTER ARCHIVE
         </Link>
       </header>
@@ -56,7 +56,7 @@ export default function Contact() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
 
-          {/* Left — What you get */}
+          {/* Left */}
           <div>
             <p className="text-[#C9A84C] text-xs tracking-widest mb-6 border-b border-[#2A2218] pb-3">
               ✦ WHAT YOU GET
@@ -74,11 +74,7 @@ export default function Contact() {
               <div key={f.title} className="flex gap-4 mb-6">
                 <span className="text-2xl flex-shrink-0">{f.icon}</span>
                 <div>
-                  <p
-                    className="text-[#F0E6D0] mb-1"
-                    style={{fontFamily:'Georgia,serif'}}>
-                    {f.title}
-                  </p>
+                  <p className="text-[#F0E6D0] mb-1" style={{fontFamily:'Georgia,serif'}}>{f.title}</p>
                   <p className="text-[#5A4E38] text-sm leading-relaxed">{f.desc}</p>
                 </div>
               </div>
@@ -90,22 +86,17 @@ export default function Contact() {
               <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-[#C9A84C]"></div>
               <p className="text-[#C9A84C] text-xs tracking-widest mb-4">✦ PRICING</p>
               <div className="space-y-3">
-                <div className="flex justify-between items-center border-b border-[#2A2218] pb-3">
-                  <p className="text-[#F0E6D0] text-sm" style={{fontFamily:'Georgia,serif'}}>Standard Family Archive</p>
-                  <p className="text-[#C9A84C] text-sm tracking-widest">$300</p>
-                </div>
-                <div className="flex justify-between items-center border-b border-[#2A2218] pb-3">
-                  <p className="text-[#F0E6D0] text-sm" style={{fontFamily:'Georgia,serif'}}>Premium + Custom Domain</p>
-                  <p className="text-[#C9A84C] text-sm tracking-widest">$500</p>
-                </div>
-                <div className="flex justify-between items-center border-b border-[#2A2218] pb-3">
-                  <p className="text-[#F0E6D0] text-sm" style={{fontFamily:'Georgia,serif'}}>Monthly Maintenance</p>
-                  <p className="text-[#C9A84C] text-sm tracking-widest">$30/mo</p>
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="text-[#F0E6D0] text-sm" style={{fontFamily:'Georgia,serif'}}>Churches & Communities</p>
-                  <p className="text-[#C9A84C] text-sm tracking-widest">Custom</p>
-                </div>
+                {[
+                  ['Standard Family Archive', '$300'],
+                  ['Premium + Custom Domain', '$500'],
+                  ['Monthly Maintenance', '$30/mo'],
+                  ['Churches & Communities', 'Custom'],
+                ].map(([label, price]) => (
+                  <div key={label} className="flex justify-between items-center border-b border-[#2A2218] pb-3 last:border-0 last:pb-0">
+                    <p className="text-[#F0E6D0] text-sm" style={{fontFamily:'Georgia,serif'}}>{label}</p>
+                    <p className="text-[#C9A84C] text-sm tracking-widest">{price}</p>
+                  </div>
+                ))}
               </div>
               <p className="text-[#5A4E38] text-xs mt-4 italic">
                 * Delivery within 48 hours. Free hosting included.
@@ -115,32 +106,38 @@ export default function Contact() {
             {/* Contact details */}
             <div className="mt-8 space-y-4">
               <p className="text-[#C9A84C] text-xs tracking-widest mb-4">✦ REACH ME DIRECTLY</p>
+
               
                 href="https://wa.me/2349062056611"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-[#9A8A6A] hover:text-[#C9A84C] transition-colors">
+                style={{color:'#9A8A6A'}}
+                className="flex items-center gap-3 transition-all hover:opacity-70">
                 <span>📱</span>
                 <span className="text-sm tracking-widest">WHATSAPP</span>
               </a>
+
               
                 href="mailto:adewole404@gmail.com"
-                className="flex items-center gap-3 text-[#9A8A6A] hover:text-[#C9A84C] transition-colors">
+                style={{color:'#9A8A6A'}}
+                className="flex items-center gap-3 transition-all hover:opacity-70">
                 <span>📧</span>
                 <span className="text-sm tracking-widest">ADEWOLE404@GMAIL.COM</span>
               </a>
+
               
                 href="https://twitter.com/alaric_121"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-[#9A8A6A] hover:text-[#C9A84C] transition-colors">
+                style={{color:'#9A8A6A'}}
+                className="flex items-center gap-3 transition-all hover:opacity-70">
                 <span>𝕏</span>
                 <span className="text-sm tracking-widest">@alaric_121</span>
               </a>
             </div>
           </div>
 
-          {/* Right — Contact form */}
+          {/* Right — Form */}
           <div>
             <p className="text-[#C9A84C] text-xs tracking-widest mb-6 border-b border-[#2A2218] pb-3">
               ✦ SEND A MESSAGE
@@ -161,7 +158,7 @@ export default function Contact() {
                 </p>
                 <button
                   onClick={() => { setSent(false); setForm({ name:'', email:'', whatsapp:'', message:'' }) }}
-                  className="mt-6 border border-[#3A3020] text-[#5A4E38] px-6 py-2 text-xs tracking-widest hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all">
+                  className="mt-6 border border-[#3A3020] text-[#5A4E38] px-6 py-2 text-xs tracking-widest transition-all hover:border-[#C9A84C] hover:text-[#C9A84C]">
                   SEND ANOTHER MESSAGE
                 </button>
               </div>
@@ -191,7 +188,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <label className="text-[#C9A84C] text-xs tracking-widest block mb-2">
-                      WHATSAPP NUMBER <span className="text-[#3A3020]">(optional)</span>
+                      WHATSAPP <span className="text-[#3A3020]">(optional)</span>
                     </label>
                     <input
                       className="w-full bg-[#0A0804] border border-[#3A3020] text-[#F0E6D0] px-4 py-3 text-sm outline-none focus:border-[#C9A84C] transition-colors"
@@ -211,9 +208,7 @@ export default function Contact() {
                     />
                   </div>
 
-                  {error && (
-                    <p className="text-red-400 text-xs">✗ {error}</p>
-                  )}
+                  {error && <p className="text-red-400 text-xs">✗ {error}</p>}
 
                   <button
                     onClick={submit}
@@ -234,11 +229,12 @@ export default function Contact() {
         {/* Demo link */}
         <div className="text-center mt-16 border-t border-[#2A2218] pt-10">
           <p className="text-[#5A4E38] text-xs tracking-widest mb-3">WANT TO SEE A LIVE DEMO FIRST?</p>
-          
+          <Link
             href="/"
-            className="text-[#C9A84C] text-sm tracking-widest hover:text-[#E8C97A] transition-colors border-b border-[#8B6914] pb-1">
+            style={{color:'#C9A84C'}}
+            className="text-sm tracking-widest border-b border-[#8B6914] pb-1 hover:opacity-70 transition-all">
             VIEW DEMO ARCHIVE
-          </a>
+          </Link>
         </div>
 
       </div>

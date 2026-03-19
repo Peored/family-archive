@@ -128,8 +128,9 @@ export default function Home() {
         </p>
         
           href="/contact"
-          className="block text-[#5A4E38] text-xs mt-3 tracking-widest hover:text-[#C9A84C] transition-colors">
-          INTERESTED IN BUILDING ONE? →
+          style={{color:'#5A4E38'}}
+          className="block text-xs mt-3 tracking-widest hover:opacity-70 transition-all">
+          INTERESTED IN BUILDING ONE?
         </a>
       </div>
       <Toast toast={toast} />
@@ -172,12 +173,14 @@ export default function Home() {
             <div className="hidden md:flex items-center gap-3">
               
                 href="/contact"
-                className="text-[#5A4E38] text-xs tracking-widest hover:text-[#C9A84C] transition-colors">
+                style={{color:'#5A4E38'}}
+                className="text-xs tracking-widest hover:opacity-70 transition-all">
                 CONTACT
               </a>
               
                 href="/messages"
-                className="text-[#5A4E38] text-xs tracking-widest hover:text-[#C9A84C] transition-colors">
+                style={{color:'#5A4E38'}}
+                className="text-xs tracking-widest hover:opacity-70 transition-all">
                 MESSAGES
               </a>
               <p className="text-[#5A4E38] text-xs tracking-widest">
@@ -209,12 +212,14 @@ export default function Home() {
             ))}
             
               href="/contact"
-              className="px-3 py-2 text-xs tracking-widest uppercase text-[#5A4E38] border border-[#2A2218] hover:text-[#C9A84C] text-center">
+              style={{color:'#5A4E38'}}
+              className="px-3 py-2 text-xs tracking-widest uppercase border border-[#2A2218] text-center hover:opacity-70">
               CONTACT
             </a>
             
               href="/messages"
-              className="px-3 py-2 text-xs tracking-widest uppercase text-[#5A4E38] border border-[#2A2218] hover:text-[#C9A84C] text-center">
+              style={{color:'#5A4E38'}}
+              className="px-3 py-2 text-xs tracking-widest uppercase border border-[#2A2218] text-center hover:opacity-70">
               MESSAGES
             </a>
             <button
@@ -291,7 +296,6 @@ function Dashboard() {
 
   return (
     <div>
-      {/* Hero */}
       <div className="text-center py-10 mb-10 border-b border-[#2A2218]">
         <p className="text-[#C9A84C] text-xs tracking-widest mb-3">
           ✦ EST. SINCE THE BEGINNING ✦
@@ -306,26 +310,20 @@ function Dashboard() {
         </p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
         {stats.map(s => (
-          <div
-            key={s.label}
-            className="border border-[#2A2218] bg-[#110E08] p-6 text-center">
+          <div key={s.label} className="border border-[#2A2218] bg-[#110E08] p-6 text-center">
             <p className="text-3xl mb-3">{s.icon}</p>
             <p
               className="text-[#C9A84C] text-3xl font-light mb-1"
               style={{fontFamily:'Georgia,serif'}}>
               {s.value}
             </p>
-            <p className="text-[#5A4E38] text-xs tracking-widest">
-              {s.label.toUpperCase()}
-            </p>
+            <p className="text-[#5A4E38] text-xs tracking-widest">{s.label.toUpperCase()}</p>
           </div>
         ))}
       </div>
 
-      {/* Recent Activity */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <p className="text-[#C9A84C] text-xs tracking-widest mb-4 border-b border-[#2A2218] pb-2">
@@ -334,18 +332,12 @@ function Dashboard() {
           {!members.length
             ? <p className="text-[#5A4E38] text-sm italic">No members yet</p>
             : members.map(m => (
-              <div
-                key={m.id}
-                className="flex gap-3 items-center mb-3 border border-[#2A2218] p-3 bg-[#110E08]">
+              <div key={m.id} className="flex gap-3 items-center mb-3 border border-[#2A2218] p-3 bg-[#110E08]">
                 {m.photo_url
                   ? <img src={m.photo_url} className="w-10 h-10 object-cover border border-[#3A3020]"/>
                   : <div className="w-10 h-10 bg-[#16120C] flex items-center justify-center text-lg border border-[#2A2218]">👤</div>}
                 <div>
-                  <p
-                    className="text-[#F0E6D0] text-sm"
-                    style={{fontFamily:'Georgia,serif'}}>
-                    {m.name}
-                  </p>
+                  <p className="text-[#F0E6D0] text-sm" style={{fontFamily:'Georgia,serif'}}>{m.name}</p>
                   <p className="text-[#5A4E38] text-xs italic">
                     {m.generation ? m.generation + ' · ' : ''}{m.birth_year || '?'}
                   </p>
@@ -362,17 +354,9 @@ function Dashboard() {
           {!stories.length
             ? <p className="text-[#5A4E38] text-sm italic">No stories yet</p>
             : stories.map(s => (
-              <div
-                key={s.id}
-                className="mb-3 border border-[#2A2218] p-3 bg-[#110E08]">
-                <p
-                  className="text-[#F0E6D0] text-sm mb-1"
-                  style={{fontFamily:'Georgia,serif'}}>
-                  {s.title}
-                </p>
-                <p className="text-[#5A4E38] text-xs italic">
-                  By {s.author || 'Anonymous'}
-                </p>
+              <div key={s.id} className="mb-3 border border-[#2A2218] p-3 bg-[#110E08]">
+                <p className="text-[#F0E6D0] text-sm mb-1" style={{fontFamily:'Georgia,serif'}}>{s.title}</p>
+                <p className="text-[#5A4E38] text-xs italic">By {s.author || 'Anonymous'}</p>
               </div>
             ))
           }

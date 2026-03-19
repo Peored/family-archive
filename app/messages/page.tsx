@@ -10,16 +10,11 @@ export default function Messages() {
   const [selected, setSelected] = useState<any>(null)
   const router = useRouter()
 
-  useEffect(() => {
-    checkAuth()
-  }, [])
+  useEffect(() => { checkAuth() }, [])
 
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      router.push('/')
-      return
-    }
+    if (!session) { router.push('/'); return }
     fetchMessages()
   }
 
@@ -62,9 +57,7 @@ export default function Messages() {
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-10">
         <div className="flex items-center justify-between mb-8 border-b border-[#2A2218] pb-4">
           <div>
-            <h2
-              className="text-3xl font-light"
-              style={{fontFamily:'Georgia,serif'}}>
+            <h2 className="text-3xl font-light" style={{fontFamily:'Georgia,serif'}}>
               Contact <em className="text-[#C9A84C]">Messages</em>
             </h2>
             <p className="text-[#5A4E38] text-xs tracking-widest mt-1">
@@ -82,11 +75,12 @@ export default function Messages() {
             <p className="text-xs tracking-widest">
               SHARE YOUR CONTACT PAGE TO START RECEIVING INQUIRIES
             </p>
-            
+            <Link
               href="/contact"
-              className="inline-block mt-6 text-[#C9A84C] text-xs tracking-widest border-b border-[#8B6914] pb-1 hover:text-[#E8C97A] transition-colors">
+              style={{color:'#C9A84C'}}
+              className="inline-block mt-6 text-xs tracking-widest border-b border-[#8B6914] pb-1 hover:opacity-70 transition-all">
               VIEW CONTACT PAGE
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="space-y-4">
@@ -97,9 +91,7 @@ export default function Messages() {
                 className="border border-[#2A2218] bg-[#110E08] p-6 cursor-pointer hover:border-[#8B6914] transition-all">
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <p
-                      className="text-[#F0E6D0] text-lg"
-                      style={{fontFamily:'Georgia,serif'}}>
+                    <p className="text-[#F0E6D0] text-lg" style={{fontFamily:'Georgia,serif'}}>
                       {m.name}
                     </p>
                     <p className="text-[#C9A84C] text-xs tracking-widest mt-1">{m.email}</p>
@@ -134,16 +126,14 @@ export default function Messages() {
             <div className="flex justify-between items-start p-6 border-b border-[#2A2218]">
               <div>
                 <p className="text-[#C9A84C] text-xs tracking-widest mb-1">✦ MESSAGE FROM</p>
-                <h2
-                  className="text-2xl font-light"
-                  style={{fontFamily:'Georgia,serif'}}>
+                <h2 className="text-2xl font-light" style={{fontFamily:'Georgia,serif'}}>
                   {selected.name}
                 </h2>
               </div>
               <button
                 onClick={() => setSelected(null)}
                 className="text-[#5A4E38] text-3xl hover:text-[#C9A84C] transition-colors ml-4 flex-shrink-0 leading-none">
-                x
+                ×
               </button>
             </div>
             <div className="p-6">
@@ -152,7 +142,8 @@ export default function Messages() {
                   <p className="text-[#8B6914] text-xs tracking-widest mb-1">EMAIL</p>
                   
                     href={`mailto:${selected.email}`}
-                    className="text-[#C9A84C] text-sm hover:text-[#E8C97A] transition-colors">
+                    style={{color:'#C9A84C'}}
+                    className="text-sm hover:opacity-70 transition-all">
                     {selected.email}
                   </a>
                 </div>
@@ -163,7 +154,8 @@ export default function Messages() {
                       href={`https://wa.me/${selected.whatsapp.replace(/\D/g,'')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#C9A84C] text-sm hover:text-[#E8C97A] transition-colors">
+                      style={{color:'#C9A84C'}}
+                      className="text-sm hover:opacity-70 transition-all">
                       {selected.whatsapp}
                     </a>
                   </div>
