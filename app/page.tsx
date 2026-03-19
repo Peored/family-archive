@@ -23,13 +23,10 @@ export default function Home() {
   const { toast, showToast } = useToast()
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setLoading(false)
     })
-
-    // Listen for ALL auth changes including logout
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
         setSession(null)
@@ -44,7 +41,6 @@ export default function Home() {
       }
       setLoading(false)
     })
-
     return () => subscription.unsubscribe()
   }, [])
 
@@ -130,6 +126,11 @@ export default function Home() {
         <p className="text-[#3A3020] text-xs mt-6 tracking-widest">
           ACCESS BY INVITATION ONLY
         </p>
+        
+          href="/contact"
+          className="block text-[#5A4E38] text-xs mt-3 tracking-widest hover:text-[#C9A84C] transition-colors">
+          INTERESTED IN BUILDING ONE? →
+        </a>
       </div>
       <Toast toast={toast} />
     </main>
@@ -169,6 +170,16 @@ export default function Home() {
               {menuOpen ? '×' : '☰'}
             </button>
             <div className="hidden md:flex items-center gap-3">
+              
+                href="/contact"
+                className="text-[#5A4E38] text-xs tracking-widest hover:text-[#C9A84C] transition-colors">
+                CONTACT
+              </a>
+              
+                href="/messages"
+                className="text-[#5A4E38] text-xs tracking-widest hover:text-[#C9A84C] transition-colors">
+                MESSAGES
+              </a>
               <p className="text-[#5A4E38] text-xs tracking-widest">
                 {session.user.email}
               </p>
@@ -196,6 +207,16 @@ export default function Home() {
                 {t}
               </button>
             ))}
+            
+              href="/contact"
+              className="px-3 py-2 text-xs tracking-widest uppercase text-[#5A4E38] border border-[#2A2218] hover:text-[#C9A84C] text-center">
+              CONTACT
+            </a>
+            
+              href="/messages"
+              className="px-3 py-2 text-xs tracking-widest uppercase text-[#5A4E38] border border-[#2A2218] hover:text-[#C9A84C] text-center">
+              MESSAGES
+            </a>
             <button
               onClick={logout}
               className="px-3 py-2 text-xs tracking-widest uppercase text-red-900 border border-[#2A2218] hover:text-red-400">
