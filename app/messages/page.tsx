@@ -72,7 +72,7 @@ export default function Messages() {
             <p className="text-2xl italic mb-2" style={{fontFamily:'Georgia,serif'}}>No messages yet</p>
             <p className="text-xs tracking-widest">SHARE YOUR CONTACT PAGE TO START RECEIVING INQUIRIES</p>
             <div className="mt-6">
-              <a href="/contact" style={goldStyle} className="text-xs tracking-widest border-b border-[#8B6914] pb-1 hover:opacity-75 transition-all">
+              <a href="/contact" style={goldStyle} className="text-xs tracking-widest border-b border-[#8B6914] pb-1 hover:opacity-75">
                 VIEW CONTACT PAGE
               </a>
             </div>
@@ -129,7 +129,7 @@ export default function Messages() {
                 <div>
                   <p className="text-[#8B6914] text-xs tracking-widest mb-1">EMAIL</p>
                   <div>
-                    <a href={`mailto:${selected.email}`} style={goldStyle} className="text-sm hover:opacity-75 transition-all">
+                    <a href={`mailto:${selected.email}`} style={goldStyle} className="text-sm hover:opacity-75">
                       {selected.email}
                     </a>
                   </div>
@@ -143,7 +143,7 @@ export default function Messages() {
                         target="_blank"
                         rel="noopener noreferrer"
                         style={goldStyle}
-                        className="text-sm hover:opacity-75 transition-all">
+                        className="text-sm hover:opacity-75">
                         {selected.whatsapp}
                       </a>
                     </div>

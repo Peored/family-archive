@@ -130,7 +130,7 @@ export default function Home() {
           
             href="/contact"
             style={{color:'#5A4E38'}}
-            className="text-xs tracking-widest hover:opacity-75 transition-all">
+            className="text-xs tracking-widest hover:opacity-75">
             INTERESTED IN BUILDING ONE?
           </a>
         </div>
@@ -176,7 +176,7 @@ export default function Home() {
                 
                   href="/contact"
                   style={{color:'#5A4E38'}}
-                  className="text-xs tracking-widest hover:opacity-75 transition-all">
+                  className="text-xs tracking-widest hover:opacity-75">
                   CONTACT
                 </a>
               </div>
@@ -184,7 +184,7 @@ export default function Home() {
                 
                   href="/messages"
                   style={{color:'#5A4E38'}}
-                  className="text-xs tracking-widest hover:opacity-75 transition-all">
+                  className="text-xs tracking-widest hover:opacity-75">
                   MESSAGES
                 </a>
               </div>
@@ -218,7 +218,7 @@ export default function Home() {
               
                 href="/contact"
                 style={{color:'#5A4E38'}}
-                className="block px-3 py-2 text-xs tracking-widest uppercase border border-[#2A2218] text-center hover:opacity-75 transition-all">
+                className="block px-3 py-2 text-xs tracking-widest uppercase border border-[#2A2218] text-center hover:opacity-75">
                 CONTACT
               </a>
             </div>
@@ -226,7 +226,7 @@ export default function Home() {
               
                 href="/messages"
                 style={{color:'#5A4E38'}}
-                className="block px-3 py-2 text-xs tracking-widest uppercase border border-[#2A2218] text-center hover:opacity-75 transition-all">
+                className="block px-3 py-2 text-xs tracking-widest uppercase border border-[#2A2218] text-center hover:opacity-75">
                 MESSAGES
               </a>
             </div>

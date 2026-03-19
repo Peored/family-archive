@@ -112,7 +112,7 @@ export default function Contact() {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={linkStyle}
-                  className="text-sm tracking-widest hover:opacity-75 transition-all">
+                  className="text-sm tracking-widest hover:opacity-75">
                   WHATSAPP
                 </a>
               </div>
@@ -121,7 +121,7 @@ export default function Contact() {
                 
                   href="mailto:adewole404@gmail.com"
                   style={linkStyle}
-                  className="text-sm tracking-widest hover:opacity-75 transition-all">
+                  className="text-sm tracking-widest hover:opacity-75">
                   ADEWOLE404@GMAIL.COM
                 </a>
               </div>
@@ -132,7 +132,7 @@ export default function Contact() {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={linkStyle}
-                  className="text-sm tracking-widest hover:opacity-75 transition-all">
+                  className="text-sm tracking-widest hover:opacity-75">
                   @alaric_121
                 </a>
               </div>
@@ -226,7 +226,7 @@ export default function Contact() {
 
         <div className="text-center mt-16 border-t border-[#2A2218] pt-10">
           <p className="text-[#5A4E38] text-xs tracking-widest mb-3">WANT TO SEE A LIVE DEMO FIRST?</p>
-          <a href="/" style={goldStyle} className="text-sm tracking-widest border-b border-[#8B6914] pb-1 hover:opacity-75 transition-all">
+          <a href="/" style={goldStyle} className="text-sm tracking-widest border-b border-[#8B6914] pb-1 hover:opacity-75">
             VIEW DEMO ARCHIVE
           </a>
         </div>
