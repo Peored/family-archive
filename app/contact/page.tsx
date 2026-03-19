@@ -27,7 +27,6 @@ export default function Contact() {
 
   return (
     <main className="min-h-screen bg-[#0A0804] text-[#F0E6D0]">
-      {/* Header */}
       <header className="border-b border-[#3A3020] px-6 py-4 flex items-center justify-between">
         <div>
           <p className="text-[#C9A84C] text-xs tracking-widest">THE ARCHIVE</p>
@@ -48,7 +47,7 @@ export default function Contact() {
           <h1
             className="text-4xl md:text-5xl font-light mb-4"
             style={{fontFamily:'Georgia,serif'}}>
-            Build Your Family's <em className="text-[#C9A84C]">Legacy</em>
+            Build Your Family{"'"}s <em className="text-[#C9A84C]">Legacy</em>
           </h1>
           <p className="text-[#9A8A6A] italic text-lg max-w-xl mx-auto leading-relaxed">
             I build private digital archives for families — preserving photos, stories, voices and family trees for generations to come.
@@ -114,7 +113,7 @@ export default function Contact() {
             </div>
 
             {/* Contact details */}
-            <div className="mt-8 space-y-3">
+            <div className="mt-8 space-y-4">
               <p className="text-[#C9A84C] text-xs tracking-widest mb-4">✦ REACH ME DIRECTLY</p>
               
                 href="https://wa.me/2349062056611"
@@ -125,10 +124,10 @@ export default function Contact() {
                 <span className="text-sm tracking-widest">WHATSAPP</span>
               </a>
               
-                href="adewole404@gmail.com"
+                href="mailto:adewole404@gmail.com"
                 className="flex items-center gap-3 text-[#9A8A6A] hover:text-[#C9A84C] transition-colors">
                 <span>📧</span>
-                <span className="text-sm tracking-widest">adewole404@gmail.com</span>
+                <span className="text-sm tracking-widest">ADEWOLE404@GMAIL.COM</span>
               </a>
               
                 href="https://twitter.com/alaric_121"
@@ -205,7 +204,7 @@ export default function Contact() {
                     <label className="text-[#C9A84C] text-xs tracking-widest block mb-2">YOUR MESSAGE</label>
                     <textarea
                       className="w-full bg-[#0A0804] border border-[#3A3020] text-[#F0E6D0] px-4 py-3 text-sm outline-none focus:border-[#C9A84C] transition-colors resize-none"
-                      placeholder="Tell me about your family and what you'd like to preserve..."
+                      placeholder="Tell me about your family and what you would like to preserve..."
                       rows={6}
                       value={form.message}
                       onChange={e => { setForm({...form, message: e.target.value}); setError('') }}
@@ -238,7 +237,7 @@ export default function Contact() {
           
             href="/"
             className="text-[#C9A84C] text-sm tracking-widest hover:text-[#E8C97A] transition-colors border-b border-[#8B6914] pb-1">
-            VIEW DEMO ARCHIVE →
+            VIEW DEMO ARCHIVE
           </a>
         </div>
 

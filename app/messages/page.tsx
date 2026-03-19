@@ -55,7 +55,7 @@ export default function Messages() {
         <Link
           href="/"
           className="text-[#5A4E38] text-xs tracking-widest hover:text-[#9A8A6A] transition-colors">
-          ← BACK TO ARCHIVE
+          BACK TO ARCHIVE
         </Link>
       </header>
 
@@ -85,7 +85,7 @@ export default function Messages() {
             
               href="/contact"
               className="inline-block mt-6 text-[#C9A84C] text-xs tracking-widest border-b border-[#8B6914] pb-1 hover:text-[#E8C97A] transition-colors">
-              VIEW CONTACT PAGE →
+              VIEW CONTACT PAGE
             </a>
           </div>
         ) : (
@@ -143,7 +143,7 @@ export default function Messages() {
               <button
                 onClick={() => setSelected(null)}
                 className="text-[#5A4E38] text-3xl hover:text-[#C9A84C] transition-colors ml-4 flex-shrink-0 leading-none">
-                ×
+                x
               </button>
             </div>
             <div className="p-6">
