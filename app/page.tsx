@@ -23,13 +23,28 @@ export default function Home() {
   const { toast, showToast } = useToast()
 
   useEffect(() => {
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setLoading(false)
     })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
+
+    // Listen for ALL auth changes including logout
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setSession(null)
+        setEmail('')
+        setPassword('')
+        setError('')
+        setTab('home')
+        setMenuOpen(false)
+        setSigningIn(false)
+      } else {
+        setSession(session)
+      }
+      setLoading(false)
     })
+
     return () => subscription.unsubscribe()
   }, [])
 
@@ -37,18 +52,27 @@ export default function Home() {
     if (!email || !password) return setError('Please enter email and password')
     setSigningIn(true)
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError('Incorrect email or password')
       setSigningIn(false)
     } else {
+      setSession(data.session)
       showToast('Welcome to the Archive ✦')
     }
   }
 
   async function logout() {
+    setLoading(true)
     await supabase.auth.signOut()
+    setSession(null)
+    setEmail('')
+    setPassword('')
+    setError('')
     setTab('home')
+    setMenuOpen(false)
+    setSigningIn(false)
+    setLoading(false)
   }
 
   function goTo(t: string) {
