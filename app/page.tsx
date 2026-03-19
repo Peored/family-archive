@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
 import Members from '@/components/Members'
 import Photos from '@/components/Photos'
 import Stories from '@/components/Stories'
@@ -10,39 +11,66 @@ import Birthdays from '@/components/Birthdays'
 import Map from '@/components/Map'
 import { Toast, useToast } from '@/components/Toast'
 
-const PASSWORD = 'adewole2025'
-
 export default function Home() {
-  const [authed, setAuthed] = useState(false)
-  const [pass, setPass] = useState('')
-  const [error, setError] = useState(false)
+  const [session, setSession] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const [tab, setTab] = useState('home')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [signingIn, setSigningIn] = useState(false)
   const { toast, showToast } = useToast()
 
   useEffect(() => {
-    const saved = localStorage.getItem('fa_authed')
-    if (saved === 'true') setAuthed(true)
+    // Check if user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setLoading(false)
+    })
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
-  function login() {
-    if (pass === PASSWORD) {
-      localStorage.setItem('fa_authed', 'true')
-      setAuthed(true)
-      showToast('Welcome to the Archive')
+  async function login() {
+    if (!email || !password) return setError('Please enter email and password')
+    setSigningIn(true)
+    setError('')
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      setError('Incorrect email or password')
+      setSigningIn(false)
     } else {
-      setError(true)
+      showToast('Welcome to the Archive ✦')
     }
   }
 
-  function logout() {
-    localStorage.removeItem('fa_authed')
-    setAuthed(false)
+  async function logout() {
+    await supabase.auth.signOut()
+    setTab('home')
   }
 
-  if (!authed) return (
+  function goTo(t: string) {
+    setTab(t)
+    setMenuOpen(false)
+  }
+
+  if (loading) return (
+    <main className="min-h-screen bg-[#0A0804] flex items-center justify-center">
+      <p className="text-[#C9A84C] text-xs tracking-widest">LOADING...</p>
+    </main>
+  )
+
+  if (!session) return (
     <main className="min-h-screen bg-[#0A0804] flex items-center justify-center px-4">
-      <div className="border border-[#3A3020] p-10 max-w-sm w-full text-center">
+      <div className="border border-[#3A3020] p-10 max-w-sm w-full text-center relative">
+        <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C9A84C]"></div>
+        <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C9A84C]"></div>
         <p className="text-[#C9A84C] text-xs tracking-widest font-light mb-4">
           ✦ FAMILY ARCHIVE ✦
         </p>
@@ -55,21 +83,33 @@ export default function Home() {
           Enter to walk among your ancestors
         </p>
         <input
-          className="w-full bg-[#0A0804] border border-[#3A3020] text-[#F0E6D0] px-4 py-3 mb-3 outline-none focus:border-[#C9A84C]"
+          className="w-full bg-[#0A0804] border border-[#3A3020] text-[#F0E6D0] px-4 py-3 mb-3 outline-none focus:border-[#C9A84C] transition-colors"
+          type="email"
+          placeholder="Email address"
+          value={email}
+          onChange={e => { setEmail(e.target.value); setError('') }}
+          onKeyDown={e => e.key === 'Enter' && login()}
+        />
+        <input
+          className="w-full bg-[#0A0804] border border-[#3A3020] text-[#F0E6D0] px-4 py-3 mb-4 outline-none focus:border-[#C9A84C] transition-colors"
           type="password"
-          placeholder="Passphrase"
-          value={pass}
-          onChange={e => { setPass(e.target.value); setError(false) }}
+          placeholder="Password"
+          value={password}
+          onChange={e => { setPassword(e.target.value); setError('') }}
           onKeyDown={e => e.key === 'Enter' && login()}
         />
         {error && (
-          <p className="text-red-400 text-xs mb-3">✗ Incorrect passphrase</p>
+          <p className="text-red-400 text-xs mb-3">✗ {error}</p>
         )}
         <button
-          className="w-full bg-[#C9A84C] text-[#0A0804] py-3 text-xs tracking-widest hover:bg-[#E8C97A] transition-all"
-          onClick={login}>
-          ENTER THE ARCHIVE
+          className="w-full bg-gradient-to-r from-[#8B6914] to-[#C9A84C] text-[#0A0804] py-3 text-xs tracking-widest hover:from-[#C9A84C] hover:to-[#E8C97A] transition-all disabled:opacity-50"
+          onClick={login}
+          disabled={signingIn}>
+          {signingIn ? 'ENTERING...' : 'ENTER THE ARCHIVE'}
         </button>
+        <p className="text-[#3A3020] text-xs mt-6 tracking-widest">
+          ACCESS BY INVITATION ONLY
+        </p>
       </div>
       <Toast toast={toast} />
     </main>
@@ -77,18 +117,13 @@ export default function Home() {
 
   const tabs = ['home','members','tree','photos','stories','voices','birthdays','map','search']
 
-  function goTo(t: string) {
-    setTab(t)
-    setMenuOpen(false)
-  }
-
   return (
     <main className="min-h-screen bg-[#0A0804] text-[#F0E6D0]">
       <header className="border-b border-[#3A3020] px-6 py-4 sticky top-0 bg-[#0A0804] z-50">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[#C9A84C] text-xs tracking-widest">THE ARCHIVE</p>
-            <p className="text-[#5A4E38] text-xs tracking-widest">Family Legacy</p>
+            <p className="text-[#5A4E38] text-xs tracking-widest">Adewumi Legacy</p>
           </div>
 
           {/* Desktop nav */}
@@ -114,11 +149,16 @@ export default function Home() {
               onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? '×' : '☰'}
             </button>
-            <button
-              onClick={logout}
-              className="hidden md:block text-[#5A4E38] text-xs tracking-widest hover:text-[#9A8A6A]">
-              LEAVE
-            </button>
+            <div className="hidden md:flex items-center gap-3">
+              <p className="text-[#5A4E38] text-xs tracking-widest">
+                {session.user.email}
+              </p>
+              <button
+                onClick={logout}
+                className="text-[#5A4E38] text-xs tracking-widest hover:text-[#9A8A6A] border border-[#2A2218] px-3 py-1 hover:border-[#5A4E38] transition-all">
+                SIGN OUT
+              </button>
+            </div>
           </div>
         </div>
 
@@ -140,7 +180,7 @@ export default function Home() {
             <button
               onClick={logout}
               className="px-3 py-2 text-xs tracking-widest uppercase text-red-900 border border-[#2A2218] hover:text-red-400">
-              LEAVE
+              SIGN OUT
             </button>
           </div>
         )}
@@ -211,6 +251,7 @@ function Dashboard() {
 
   return (
     <div>
+      {/* Hero */}
       <div className="text-center py-10 mb-10 border-b border-[#2A2218]">
         <p className="text-[#C9A84C] text-xs tracking-widest mb-3">
           ✦ EST. SINCE THE BEGINNING ✦
@@ -225,6 +266,7 @@ function Dashboard() {
         </p>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
         {stats.map(s => (
           <div
@@ -243,6 +285,7 @@ function Dashboard() {
         ))}
       </div>
 
+      {/* Recent Activity */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <p className="text-[#C9A84C] text-xs tracking-widest mb-4 border-b border-[#2A2218] pb-2">
