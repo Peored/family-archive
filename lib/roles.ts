@@ -10,5 +10,5 @@ export async function getUserRole(): Promise<'admin' | 'viewer'> {
     .eq('user_id', user.id)
     .single()
 
-  return (data?.role as 'admin' | 'viewer') || 'viewer'
+  return (data?.role as 'admin' | 'viewer') || 'admin'
 }
