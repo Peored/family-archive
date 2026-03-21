@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Members from '@/components/Members'
@@ -20,9 +20,11 @@ export default function Home() {
   const [error, setError] = useState('')
   const [tab, setTab] = useState('home')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
   const [signingIn, setSigningIn] = useState(false)
   const { toast, showToast } = useToast()
   const router = useRouter()
+  const moreRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -44,6 +46,17 @@ export default function Home() {
       setLoading(false)
     })
     return () => subscription.unsubscribe()
+  }, [])
+
+  // Close more dropdown when clicking outside
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
   async function login() {
@@ -76,6 +89,7 @@ export default function Home() {
   function goTo(t: string) {
     setTab(t)
     setMenuOpen(false)
+    setMoreOpen(false)
   }
 
   if (loading) return (
@@ -117,45 +131,93 @@ export default function Home() {
           {signingIn ? 'ENTERING...' : 'ENTER THE ARCHIVE'}
         </button>
         <p className="text-[#3A3020] text-xs mt-6 tracking-widest">ACCESS BY INVITATION ONLY</p>
-        <button
-          onClick={() => router.push('/contact')}
-          className="text-[#5A4E38] text-xs tracking-widest mt-3 block w-full bg-transparent border-none cursor-pointer"
-        >
-          INTERESTED IN BUILDING ONE?
-        </button>
+        <div className="mt-3">
+          <button
+            onClick={() => router.push('/contact')}
+            className="text-[#5A4E38] text-xs tracking-widest bg-transparent border-none cursor-pointer"
+          >
+            INTERESTED IN BUILDING ONE?
+          </button>
+        </div>
       </div>
       <Toast toast={toast} />
     </main>
   )
 
-  const tabs = ['home','members','tree','photos','stories','voices','birthdays','map','search']
+  const mainTabs = ['home','members','tree','photos','stories']
+  const moreTabs = ['voices','birthdays','map','search']
+  const allMobileTabs = ['home','members','tree','photos','stories','voices','birthdays','map','search']
 
   return (
     <main className="min-h-screen bg-[#0A0804] text-[#F0E6D0]">
       <header className="border-b border-[#3A3020] px-6 py-4 sticky top-0 bg-[#0A0804] z-50">
         <div className="flex items-center justify-between">
+
+          {/* Brand */}
           <div>
             <p className="text-[#C9A84C] text-xs tracking-widest">THE ARCHIVE</p>
             <p className="text-[#5A4E38] text-xs tracking-widest">Adewumi Legacy</p>
           </div>
-          <nav className="hidden md:flex gap-1 flex-wrap">
-            {tabs.map(t => (
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-1">
+            {mainTabs.map(t => (
               <button
                 key={t}
                 onClick={() => goTo(t)}
-                className={`px-3 py-2 text-xs tracking-widest uppercase transition-all border-b-2 ${tab === t ? 'text-[#C9A84C] border-[#C9A84C]' : 'text-[#5A4E38] border-transparent hover:text-[#9A8A6A]'}`}
+                className={`px-3 py-2 text-xs tracking-widest uppercase transition-all border-b-2 ${
+                  tab === t
+                    ? 'text-[#C9A84C] border-[#C9A84C]'
+                    : 'text-[#5A4E38] border-transparent hover:text-[#9A8A6A]'
+                }`}
               >
                 {t}
               </button>
             ))}
+
+            {/* More dropdown */}
+            <div className="relative" ref={moreRef}>
+              <button
+                onClick={() => setMoreOpen(!moreOpen)}
+                className={`px-3 py-2 text-xs tracking-widest uppercase transition-all border-b-2 flex items-center gap-1 ${
+                  moreTabs.includes(tab)
+                    ? 'text-[#C9A84C] border-[#C9A84C]'
+                    : 'text-[#5A4E38] border-transparent hover:text-[#9A8A6A]'
+                }`}
+              >
+                MORE {moreOpen ? '▲' : '▼'}
+              </button>
+              {moreOpen && (
+                <div className="absolute top-full left-0 mt-1 bg-[#110E08] border border-[#3A3020] min-w-[140px] z-50">
+                  {moreTabs.map(t => (
+                    <button
+                      key={t}
+                      onClick={() => goTo(t)}
+                      className={`block w-full text-left px-4 py-3 text-xs tracking-widest uppercase transition-all ${
+                        tab === t
+                          ? 'text-[#C9A84C] bg-[#1A1510]'
+                          : 'text-[#5A4E38] hover:text-[#9A8A6A] hover:bg-[#1A1510]'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </nav>
+
+          {/* Right side actions */}
           <div className="flex items-center gap-3">
+            {/* Mobile hamburger */}
             <button
               className="md:hidden text-[#C9A84C] text-2xl leading-none"
               onClick={() => setMenuOpen(!menuOpen)}
             >
               {menuOpen ? '×' : '☰'}
             </button>
+
+            {/* Desktop actions */}
             <div className="hidden md:flex items-center gap-3">
               <button
                 onClick={() => router.push('/contact')}
@@ -169,7 +231,6 @@ export default function Home() {
               >
                 MESSAGES
               </button>
-              <p className="text-[#5A4E38] text-xs tracking-widest">{session.user.email}</p>
               <button
                 onClick={logout}
                 className="text-[#5A4E38] text-xs tracking-widest hover:text-[#9A8A6A] border border-[#2A2218] px-3 py-1 hover:border-[#5A4E38] transition-all"
@@ -180,13 +241,18 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Mobile dropdown — unchanged */}
         {menuOpen && (
           <div className="md:hidden mt-4 border-t border-[#2A2218] pt-4 grid grid-cols-3 gap-2">
-            {tabs.map(t => (
+            {allMobileTabs.map(t => (
               <button
                 key={t}
                 onClick={() => goTo(t)}
-                className={`px-3 py-2 text-xs tracking-widest uppercase transition-all border ${tab === t ? 'text-[#C9A84C] border-[#C9A84C] bg-[#110E08]' : 'text-[#5A4E38] border-[#2A2218] hover:text-[#9A8A6A]'}`}
+                className={`px-3 py-2 text-xs tracking-widest uppercase transition-all border ${
+                  tab === t
+                    ? 'text-[#C9A84C] border-[#C9A84C] bg-[#110E08]'
+                    : 'text-[#5A4E38] border-[#2A2218] hover:text-[#9A8A6A]'
+                }`}
               >
                 {t}
               </button>
@@ -224,6 +290,7 @@ export default function Home() {
         {tab === 'map'       && <Map />}
         {tab === 'search'    && <Search />}
       </div>
+
       <Toast toast={toast} />
     </main>
   )
