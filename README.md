@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Family Archive
 
-## Getting Started
+Family Archive is a web application designed to help families preserve and explore their shared history in one place.
 
-First, run the development server:
+It brings together family relationships, photographs, personal stories, birthdays, voice memories, and other meaningful moments in a central digital archive.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Live Demo
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+"Visit Family Archive" (https://family-archive-chi.vercel.app/)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Family Tree: Explore family relationships and connections.
+- Family Members: Organise and view family member information.
+- Photo Gallery: Preserve and browse family photographs.
+- Stories: Share and document family memories.
+- Voice Memories: Keep spoken memories and recordings.
+- Birthdays: Keep track of important family dates.
+- Search: Find information within the archive.
+- Map: Explore family-related locations.
+- Role-Based Access: Support different access levels for users.
 
-## Learn More
+Feature availability depends on the current implementation and configuration.
 
-To learn more about Next.js, take a look at the following resources:
+Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Supabase
+- Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Getting Started
 
-## Deploy on Vercel
+Prerequisites
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Node.js
+- npm
+- A Supabase project with the required database and authentication configuration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Installation
+
+1. Clone the repository:
+   
+   git clone https://github.com/Peored/family-archive.git
+
+2. Enter the project directory:
+   
+   cd family-archive
+
+3. Install dependencies:
+   
+   npm install
+
+4. Configure the required environment variables in a local ".env.local" file. Use the variable names expected by the application and never commit credentials or secret keys.
+
+5. Start the development server:
+   
+   npm run dev
+
+6. Open "http://localhost:3000" (http://localhost:3000).
+
+Production Build
+
+Run the following commands to check the application locally:
+
+npm run lint
+npm run build
+
+Project Goals
+
+Family Archive aims to make family history easier to preserve, organise, and pass on to future generations.
+
+Author
+
+Developed by Peored.
+
+License
+
+No license has been specified yet. Contact the repository owner for permission to reuse this project.
