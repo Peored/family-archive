@@ -1,0 +1,256 @@
+-- Family Archive: multi-tenant migration
+-- Run ONCE in the Supabase SQL editor. BACK UP YOUR DATABASE FIRST.
+--
+-- What this does:
+--   1. Adds `families` and `memberships` (user <-> family, with a per-family role)
+--   2. Adds `family_id` to members, photos, stories, voices
+--   3. Moves ALL your existing data into family #1 ("Adewumi Legacy", slug "adewumi")
+--   4. Replaces every RLS policy on those tables so a row is only visible to
+--      members of its family, and only writable by that family's admins
+--   5. Locks down the `family-media` storage bucket by family folder
+--   6. Makes `contacts` (the "interested in building one?" form) readable only
+--      by platform admins (you)
+--
+-- NOTE: the old `user_roles` table is left untouched but is no longer used.
+
+begin;
+
+-- ---------------------------------------------------------------------------
+-- 1. Core tables
+-- ---------------------------------------------------------------------------
+create table public.families (
+  id          uuid primary key default gen_random_uuid(),
+  slug        text not null unique
+              check (slug ~ '^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$'),
+  name        text not null check (char_length(name) between 1 and 80),
+  tagline     text,
+  created_by  uuid references auth.users(id) on delete set null,
+  created_at  timestamptz not null default now()
+);
+
+create table public.memberships (
+  family_id   uuid not null references public.families(id) on delete cascade,
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  role        text not null check (role in ('admin', 'viewer')),
+  created_at  timestamptz not null default now(),
+  primary key (family_id, user_id)
+);
+create index memberships_user_idx on public.memberships(user_id);
+
+-- Owners of the platform itself (can read the contact-form inbox)
+create table public.platform_admins (
+  user_id uuid primary key references auth.users(id) on delete cascade
+);
+
+-- ---------------------------------------------------------------------------
+-- 2. Helper functions (SECURITY DEFINER so policies don't recurse into RLS)
+-- ---------------------------------------------------------------------------
+create function public.is_family_member(fid uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.memberships
+    where family_id = fid and user_id = auth.uid()
+  );
+$$;
+
+create function public.is_family_admin(fid uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.memberships
+    where family_id = fid and user_id = auth.uid() and role = 'admin'
+  );
+$$;
+
+create function public.is_platform_admin()
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.platform_admins where user_id = auth.uid());
+$$;
+
+-- Safe text -> uuid cast (returns null instead of raising)
+create function public.try_uuid(t text)
+returns uuid language plpgsql immutable as $$
+begin
+  return t::uuid;
+exception when others then
+  return null;
+end;
+$$;
+
+revoke all on function public.is_family_member(uuid)  from public;
+revoke all on function public.is_family_admin(uuid)   from public;
+revoke all on function public.is_platform_admin()     from public;
+grant execute on function public.is_family_member(uuid)  to authenticated;
+grant execute on function public.is_family_admin(uuid)   to authenticated;
+grant execute on function public.is_platform_admin()     to authenticated;
+
+-- Create a family and make the caller its admin, atomically.
+create function public.create_family(p_name text, p_slug text, p_tagline text default null)
+returns public.families
+language plpgsql security definer set search_path = public as $$
+declare
+  f public.families;
+begin
+  if auth.uid() is null then
+    raise exception 'Not signed in';
+  end if;
+  insert into public.families (name, slug, tagline, created_by)
+  values (trim(p_name), lower(trim(p_slug)), p_tagline, auth.uid())
+  returning * into f;
+  insert into public.memberships (family_id, user_id, role)
+  values (f.id, auth.uid(), 'admin');
+  return f;
+end;
+$$;
+revoke all on function public.create_family(text, text, text) from public;
+grant execute on function public.create_family(text, text, text) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 3. Backfill: existing data becomes family #1
+-- ---------------------------------------------------------------------------
+insert into public.families (slug, name, tagline)
+values ('adewumi', 'Adewumi Legacy', 'A living record of our blood, our stories, our faces.');
+
+-- Carry over existing roles
+insert into public.memberships (family_id, user_id, role)
+select (select id from public.families where slug = 'adewumi'), ur.user_id, ur.role
+from public.user_roles ur
+join auth.users u on u.id = ur.user_id
+where ur.role in ('admin', 'viewer')
+on conflict do nothing;
+
+-- Existing accounts with no user_roles row used to be treated as admin by the
+-- app (a bug). They become viewers here, EXCEPT: if nobody ended up an admin,
+-- the oldest account becomes admin so you are never locked out.
+insert into public.memberships (family_id, user_id, role)
+select (select id from public.families where slug = 'adewumi'), u.id, 'viewer'
+from auth.users u
+on conflict do nothing;
+
+update public.memberships m
+set role = 'admin'
+where m.user_id = (select id from auth.users order by created_at asc limit 1)
+  and not exists (
+    select 1 from public.memberships a
+    where a.family_id = m.family_id and a.role = 'admin'
+  );
+
+-- The family's admins are also platform admins (contact inbox)
+insert into public.platform_admins (user_id)
+select user_id from public.memberships where role = 'admin'
+on conflict do nothing;
+
+-- ---------------------------------------------------------------------------
+-- 4. family_id on tenant tables + RLS
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  t text;
+  pol record;
+  first_family uuid := (select id from public.families where slug = 'adewumi');
+begin
+  foreach t in array array['members', 'photos', 'stories', 'voices'] loop
+    execute format('alter table public.%I add column if not exists family_id uuid references public.families(id) on delete cascade', t);
+    execute format('update public.%I set family_id = %L where family_id is null', t, first_family);
+    execute format('alter table public.%I alter column family_id set not null', t);
+    execute format('create index if not exists %I on public.%I(family_id)', t || '_family_idx', t);
+
+    -- Drop EVERY existing policy. Old permissive policies are OR-ed with new
+    -- ones, so leaving any behind would defeat the isolation.
+    for pol in select policyname from pg_policies where schemaname = 'public' and tablename = t loop
+      execute format('drop policy %I on public.%I', pol.policyname, t);
+    end loop;
+
+    execute format('alter table public.%I enable row level security', t);
+
+    execute format('create policy %I on public.%I for select to authenticated using (public.is_family_member(family_id))', t || '_select', t);
+    execute format('create policy %I on public.%I for insert to authenticated with check (public.is_family_admin(family_id))', t || '_insert', t);
+    execute format('create policy %I on public.%I for update to authenticated using (public.is_family_admin(family_id)) with check (public.is_family_admin(family_id))', t || '_update', t);
+    execute format('create policy %I on public.%I for delete to authenticated using (public.is_family_admin(family_id))', t || '_delete', t);
+  end loop;
+end $$;
+
+-- families
+alter table public.families enable row level security;
+create policy families_select on public.families
+  for select to authenticated using (public.is_family_member(id));
+create policy families_update on public.families
+  for update to authenticated
+  using (public.is_family_admin(id)) with check (public.is_family_admin(id));
+-- no insert/delete policies: families are created through create_family()
+
+-- memberships
+alter table public.memberships enable row level security;
+create policy memberships_select on public.memberships
+  for select to authenticated
+  using (user_id = auth.uid() or public.is_family_admin(family_id));
+create policy memberships_insert on public.memberships
+  for insert to authenticated with check (public.is_family_admin(family_id));
+create policy memberships_update on public.memberships
+  for update to authenticated
+  using (public.is_family_admin(family_id)) with check (public.is_family_admin(family_id));
+create policy memberships_delete on public.memberships
+  for delete to authenticated using (public.is_family_admin(family_id));
+
+-- platform_admins: no policies = nobody can read/write through the API
+alter table public.platform_admins enable row level security;
+
+-- contacts: anyone can submit, only platform admins can read/delete
+do $$
+declare pol record;
+begin
+  for pol in select policyname from pg_policies where schemaname = 'public' and tablename = 'contacts' loop
+    execute format('drop policy %I on public.contacts', pol.policyname);
+  end loop;
+end $$;
+alter table public.contacts enable row level security;
+create policy contacts_insert on public.contacts
+  for insert to anon, authenticated with check (true);
+create policy contacts_select on public.contacts
+  for select to authenticated using (public.is_platform_admin());
+create policy contacts_delete on public.contacts
+  for delete to authenticated using (public.is_platform_admin());
+
+-- ---------------------------------------------------------------------------
+-- 5. Storage: family-media bucket, folder = family_id
+--    New uploads go to  <family_id>/<kind>/<random>.<ext>
+--    Existing files (photos/…, voices/…, members/…) keep working: the bucket
+--    stays public-read, so their stored URLs are unchanged.
+-- ---------------------------------------------------------------------------
+do $$
+declare pol record;
+begin
+  for pol in
+    select policyname from pg_policies
+    where schemaname = 'storage' and tablename = 'objects'
+      and (coalesce(qual, '') ilike '%family-media%' or coalesce(with_check, '') ilike '%family-media%')
+  loop
+    execute format('drop policy %I on storage.objects', pol.policyname);
+  end loop;
+end $$;
+
+create policy family_media_insert on storage.objects
+  for insert to authenticated
+  with check (
+    bucket_id = 'family-media'
+    and public.is_family_admin(public.try_uuid((storage.foldername(name))[1]))
+  );
+create policy family_media_update on storage.objects
+  for update to authenticated
+  using (
+    bucket_id = 'family-media'
+    and public.is_family_admin(public.try_uuid((storage.foldername(name))[1]))
+  );
+create policy family_media_delete on storage.objects
+  for delete to authenticated
+  using (
+    bucket_id = 'family-media'
+    and public.is_family_admin(public.try_uuid((storage.foldername(name))[1]))
+  );
+create policy family_media_select on storage.objects
+  for select to authenticated
+  using (
+    bucket_id = 'family-media'
+    and public.is_family_member(public.try_uuid((storage.foldername(name))[1]))
+  );
+
+commit;
