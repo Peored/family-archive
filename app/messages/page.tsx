@@ -2,18 +2,24 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import Invites from '@/components/Invites'
+import { Toast, useToast } from '@/components/Toast'
 
 export default function Messages() {
   const [messages, setMessages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<any>(null)
   const router = useRouter()
+  const { toast, showToast } = useToast()
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
 
   useEffect(() => { checkAuth() }, [])
 
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { router.push('/'); return }
+    const { data: platformAdmin } = await supabase.rpc('is_platform_admin')
+    setIsPlatformAdmin(platformAdmin === true)
     fetchMessages()
   }
 
@@ -55,6 +61,12 @@ export default function Messages() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-10">
+        {isPlatformAdmin && (
+          <div className="mb-14">
+            <Invites scope="platform" showToast={showToast} />
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-8 border-b border-[#2A2218] pb-4">
           <div>
             <h2 className="text-3xl font-light" style={{fontFamily:'Georgia,serif'}}>
@@ -106,6 +118,8 @@ export default function Messages() {
           </div>
         )}
       </div>
+
+      <Toast toast={toast} />
 
       {selected && (
         <div

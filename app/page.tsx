@@ -11,6 +11,7 @@ import Tree from '@/components/Tree'
 import Search from '@/components/Search'
 import Birthdays from '@/components/Birthdays'
 import Map from '@/components/Map'
+import Invites from '@/components/Invites'
 import { Toast, useToast } from '@/components/Toast'
 
 export default function Home() {
@@ -27,10 +28,14 @@ export default function Home() {
   const router = useRouter()
   const moreRef = useRef<HTMLDivElement>(null)
   const [family, setFamily] = useState<Family | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    if (!session) { setFamily(null); return }
-    getActiveFamily().then(a => setFamily(a?.family ?? null))
+    if (!session) { setFamily(null); setIsAdmin(false); return }
+    getActiveFamily().then(a => {
+      setFamily(a?.family ?? null)
+      setIsAdmin(a?.role === 'admin')
+    })
   }, [session])
 
   useEffect(() => {
@@ -152,8 +157,8 @@ export default function Home() {
   )
 
   const mainTabs = ['home','members','tree','photos','stories']
-  const moreTabs = ['voices','birthdays','map','search']
-  const allMobileTabs = ['home','members','tree','photos','stories','voices','birthdays','map','search']
+  const moreTabs = ['voices','birthdays','map','search', ...(isAdmin ? ['invite'] : [])]
+  const allMobileTabs = ['home','members','tree','photos','stories','voices','birthdays','map','search', ...(isAdmin ? ['invite'] : [])]
 
   return (
     <main className="min-h-screen bg-[#0A0804] text-[#F0E6D0]">
@@ -296,6 +301,7 @@ export default function Home() {
         {tab === 'birthdays' && <Birthdays />}
         {tab === 'map'       && <Map />}
         {tab === 'search'    && <Search />}
+        {tab === 'invite'    && isAdmin && <Invites scope="family" showToast={showToast} />}
       </div>
 
       <Toast toast={toast} />
@@ -344,6 +350,13 @@ function Dashboard() {
   ]
 
   if (loading) return <p className="text-[#5A4E38] text-sm tracking-widest">LOADING...</p>
+
+  if (!family) return (
+    <div className="text-center py-24 text-[#5A4E38]">
+      <p className="text-2xl italic mb-2" style={{fontFamily:'Georgia,serif'}}>You are not part of a family archive yet</p>
+      <p className="text-xs tracking-widest">ASK A FAMILY ADMIN FOR AN INVITATION LINK</p>
+    </div>
+  )
 
   return (
     <div>
