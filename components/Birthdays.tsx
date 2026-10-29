@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getFamilyId } from '@/lib/family'
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
@@ -14,9 +15,12 @@ export default function Birthdays() {
   useEffect(() => { fetchMembers() }, [])
 
   async function fetchMembers() {
+    const fid = await getFamilyId()
+    if (!fid) { setMembers([]); setLoading(false); return }
     const { data } = await supabase
       .from('members')
       .select('id, name, birth_year, photo_url, birth_month, birth_day')
+      .eq('family_id', fid)
       .order('birth_month', { ascending: true })
     setMembers(data || [])
     setLoading(false)
@@ -24,8 +28,11 @@ export default function Birthdays() {
 
   async function saveBirthday() {
     if (!form.name) return alert('Please enter a name')
+    const fid = await getFamilyId()
+    if (!fid) return alert('No family selected')
     setSaving(true)
     await supabase.from('members').insert([{
+      family_id: fid,
       name: form.name,
       birth_year: form.birth_year,
       birth_month: form.birth_month ? parseInt(form.birth_month) : null,

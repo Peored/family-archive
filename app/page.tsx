@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getActiveFamily, type Family } from '@/lib/family'
 import { useRouter } from 'next/navigation'
 import Members from '@/components/Members'
 import Photos from '@/components/Photos'
@@ -25,6 +26,12 @@ export default function Home() {
   const { toast, showToast } = useToast()
   const router = useRouter()
   const moreRef = useRef<HTMLDivElement>(null)
+  const [family, setFamily] = useState<Family | null>(null)
+
+  useEffect(() => {
+    if (!session) { setFamily(null); return }
+    getActiveFamily().then(a => setFamily(a?.family ?? null))
+  }, [session])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -104,7 +111,7 @@ export default function Home() {
         <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C9A84C]"></div>
         <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C9A84C]"></div>
         <p className="text-[#C9A84C] text-xs tracking-widest font-light mb-4">✦ FAMILY ARCHIVE ✦</p>
-        <h1 className="text-[#F0E6D0] text-3xl mb-2" style={{fontFamily:'Georgia,serif'}}>Adewumi Legacy</h1>
+        <h1 className="text-[#F0E6D0] text-3xl mb-2" style={{fontFamily:'Georgia,serif'}}>Family Archive</h1>
         <p className="text-[#9A8A6A] text-sm italic mb-8">Enter to walk among your ancestors</p>
         <input
           className="w-full bg-[#0A0804] border border-[#3A3020] text-[#F0E6D0] px-4 py-3 mb-3 outline-none focus:border-[#C9A84C] transition-colors"
@@ -155,8 +162,8 @@ export default function Home() {
 
           {/* Brand */}
           <div>
-            <p className="text-[#C9A84C] text-xs tracking-widest">THE ARCHIVE</p>
-            <p className="text-[#5A4E38] text-xs tracking-widest">Adewumi Legacy</p>
+            <p className="text-[#C9A84C] text-xs tracking-widest">FAMILY ARCHIVE</p>
+            <p className="text-[#5A4E38] text-xs tracking-widest">{family?.name ?? ''}</p>
           </div>
 
           {/* Desktop nav */}
@@ -302,18 +309,23 @@ function Dashboard() {
   const [stories, setStories] = useState<any[]>([])
   const [photos, setPhotos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [family, setFamily] = useState<Family | null>(null)
 
   useEffect(() => {
     async function load() {
       const { supabase } = await import('@/lib/supabase')
+      const active = await getActiveFamily()
+      if (!active) { setLoading(false); return }
+      const fid = active.family.id
+      setFamily(active.family)
       const [mc, pc, sc, vc, mr, sr, pr] = await Promise.all([
-        supabase.from('members').select('id', { count: 'exact', head: true }),
-        supabase.from('photos').select('id', { count: 'exact', head: true }),
-        supabase.from('stories').select('id', { count: 'exact', head: true }),
-        supabase.from('voices').select('id', { count: 'exact', head: true }),
-        supabase.from('members').select('*').order('created_at', { ascending: false }).limit(3),
-        supabase.from('stories').select('*').order('created_at', { ascending: false }).limit(3),
-        supabase.from('photos').select('*').order('created_at', { ascending: false }).limit(4),
+        supabase.from('members').select('id', { count: 'exact', head: true }).eq('family_id', fid),
+        supabase.from('photos').select('id', { count: 'exact', head: true }).eq('family_id', fid),
+        supabase.from('stories').select('id', { count: 'exact', head: true }).eq('family_id', fid),
+        supabase.from('voices').select('id', { count: 'exact', head: true }).eq('family_id', fid),
+        supabase.from('members').select('*').eq('family_id', fid).order('created_at', { ascending: false }).limit(3),
+        supabase.from('stories').select('*').eq('family_id', fid).order('created_at', { ascending: false }).limit(3),
+        supabase.from('photos').select('*').eq('family_id', fid).order('created_at', { ascending: false }).limit(4),
       ])
       setCounts({ members: mc.count||0, photos: pc.count||0, stories: sc.count||0, voices: vc.count||0 })
       setMembers(mr.data || [])
@@ -338,9 +350,9 @@ function Dashboard() {
       <div className="text-center py-10 mb-10 border-b border-[#2A2218]">
         <p className="text-[#C9A84C] text-xs tracking-widest mb-3">✦ EST. SINCE THE BEGINNING ✦</p>
         <h1 className="text-4xl md:text-5xl font-light mb-3" style={{fontFamily:'Georgia,serif'}}>
-          The <em className="text-[#C9A84C]">Adewumi</em> Legacy
+          <em className="text-[#C9A84C]">{family?.name ?? 'Family Archive'}</em>
         </h1>
-        <p className="text-[#9A8A6A] italic text-lg">A living record of our blood, our stories, our faces.</p>
+        <p className="text-[#9A8A6A] italic text-lg">{family?.tagline || 'A living record of our blood, our stories, our faces.'}</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">

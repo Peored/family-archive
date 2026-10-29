@@ -1,14 +1,7 @@
-import { supabase } from './supabase'
+import { getActiveFamily } from './family'
 
+// Fails closed: anyone without an explicit membership is a viewer.
 export async function getUserRole(): Promise<'admin' | 'viewer'> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return 'viewer'
-
-  const { data } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user.id)
-    .single()
-
-  return (data?.role as 'admin' | 'viewer') || 'admin'
+  const active = await getActiveFamily()
+  return active?.role === 'admin' ? 'admin' : 'viewer'
 }

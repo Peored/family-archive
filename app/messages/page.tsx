@@ -44,7 +44,7 @@ export default function Messages() {
       <header className="border-b border-[#3A3020] px-6 py-4 flex items-center justify-between sticky top-0 bg-[#0A0804] z-50">
         <div>
           <p className="text-[#C9A84C] text-xs tracking-widest">THE ARCHIVE</p>
-          <p className="text-[#5A4E38] text-xs tracking-widest">Adewumi Legacy</p>
+          <p className="text-[#5A4E38] text-xs tracking-widest">Family Archive</p>
         </div>
         <button
           onClick={() => router.push('/')}

@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getFamilyId } from '@/lib/family'
 
 export default function Map() {
   const [members, setMembers] = useState<any[]>([])
@@ -10,9 +11,12 @@ export default function Map() {
   useEffect(() => { fetchMembers() }, [])
 
   async function fetchMembers() {
+    const fid = await getFamilyId()
+    if (!fid) { setMembers([]); setLoading(false); return }
     const { data } = await supabase
       .from('members')
       .select('id, name, hometown, photo_url, birth_year, death_year, role, generation')
+      .eq('family_id', fid)
       .not('hometown', 'is', null)
     setMembers((data || []).filter(m => m.hometown && m.hometown.trim() !== ''))
     setLoading(false)

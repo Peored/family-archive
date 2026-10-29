@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getFamilyId, mediaPath } from '@/lib/family'
 import { useRole } from './RoleGuard'
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -23,19 +24,22 @@ export default function Members({ showToast }: { showToast?: (msg: string, type?
   useEffect(() => { fetchMembers() }, [])
 
   async function fetchMembers() {
-    const { data } = await supabase.from('members').select('*').order('created_at')
+    const fid = await getFamilyId()
+    if (!fid) { setMembers([]); setLoading(false); return }
+    const { data } = await supabase.from('members').select('*').eq('family_id', fid).order('created_at')
     setMembers(data || [])
     setLoading(false)
   }
 
   async function saveMember() {
     if (!form.name) return alert('Please enter a name')
+    const fid = await getFamilyId()
+    if (!fid) return alert('No family selected')
     setSaving(true)
     let photo_url = null
 
     if (photo) {
-      const ext = photo.name.split('.').pop()
-      const path = `members/${Date.now()}.${ext}`
+      const path = mediaPath(fid, 'members', photo)
       await supabase.storage.from('family-media').upload(path, photo)
       const { data: urlData } = supabase.storage.from('family-media').getPublicUrl(path)
       photo_url = urlData.publicUrl
@@ -55,7 +59,7 @@ export default function Members({ showToast }: { showToast?: (msg: string, type?
       setEditingId(null)
       showToast?.('Member updated successfully')
     } else {
-      await supabase.from('members').insert([{ ...payload, photo_url }])
+      await supabase.from('members').insert([{ ...payload, photo_url, family_id: fid }])
       showToast?.('Member added to the archive')
     }
 

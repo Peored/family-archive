@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getFamilyId, mediaPath } from '@/lib/family'
 import { useRole } from './RoleGuard'
 
 export default function Photos({ showToast }: { showToast?: (msg: string, type?: 'success'|'error') => void }) {
@@ -17,7 +18,9 @@ export default function Photos({ showToast }: { showToast?: (msg: string, type?:
   useEffect(() => { fetchPhotos() }, [])
 
   async function fetchPhotos() {
-    const { data } = await supabase.from('photos').select('*').order('created_at', { ascending: false })
+    const fid = await getFamilyId()
+    if (!fid) { setPhotos([]); setLoading(false); return }
+    const { data } = await supabase.from('photos').select('*').eq('family_id', fid).order('created_at', { ascending: false })
     setPhotos(data || [])
     setLoading(false)
   }
@@ -31,12 +34,13 @@ export default function Photos({ showToast }: { showToast?: (msg: string, type?:
 
   async function savePhoto() {
     if (!file) return alert('Please select a photo')
+    const fid = await getFamilyId()
+    if (!fid) return alert('No family selected')
     setSaving(true)
-    const ext = file.name.split('.').pop()
-    const path = `photos/${Date.now()}.${ext}`
+    const path = mediaPath(fid, 'photos', file)
     await supabase.storage.from('family-media').upload(path, file)
     const { data: urlData } = supabase.storage.from('family-media').getPublicUrl(path)
-    await supabase.from('photos').insert([{ ...form, url: urlData.publicUrl }])
+    await supabase.from('photos').insert([{ ...form, url: urlData.publicUrl, family_id: fid }])
     setSaving(false)
     setShowForm(false)
     setFile(null)

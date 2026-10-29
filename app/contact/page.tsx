@@ -30,8 +30,7 @@ export default function Contact() {
     <main className="min-h-screen bg-[#0A0804] text-[#F0E6D0]">
       <header className="border-b border-[#3A3020] px-6 py-4 flex items-center justify-between">
         <div>
-          <p className="text-[#C9A84C] text-xs tracking-widest">THE ARCHIVE</p>
-          <p className="text-[#5A4E38] text-xs tracking-widest">Adewumi Legacy</p>
+          <p className="text-[#C9A84C] text-xs tracking-widest">FAMILY ARCHIVE</p>
         </div>
         <button
           onClick={() => router.push('/')}

@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getFamilyId } from '@/lib/family'
 import { useRole } from './RoleGuard'
 
 export default function Stories({ showToast }: { showToast?: (msg: string, type?: 'success'|'error') => void }) {
@@ -15,7 +16,9 @@ export default function Stories({ showToast }: { showToast?: (msg: string, type?
   useEffect(() => { fetchStories() }, [])
 
   async function fetchStories() {
-    const { data } = await supabase.from('stories').select('*').order('created_at', { ascending: false })
+    const fid = await getFamilyId()
+    if (!fid) { setStories([]); setLoading(false); return }
+    const { data } = await supabase.from('stories').select('*').eq('family_id', fid).order('created_at', { ascending: false })
     setStories(data || [])
     setLoading(false)
   }
@@ -23,8 +26,10 @@ export default function Stories({ showToast }: { showToast?: (msg: string, type?
   async function saveStory() {
     if (!form.title) return alert('Please enter a title')
     if (!form.body) return alert('Please write the story')
+    const fid = await getFamilyId()
+    if (!fid) return alert('No family selected')
     setSaving(true)
-    await supabase.from('stories').insert([{ ...form }])
+    await supabase.from('stories').insert([{ ...form, family_id: fid }])
     setSaving(false)
     setShowForm(false)
     setForm({ title:'', author:'', subject:'', body:'' })

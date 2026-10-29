@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getFamilyId, mediaPath } from '@/lib/family'
 import { useRole } from './RoleGuard'
 
 export default function Voices({ showToast }: { showToast?: (msg: string, type?: 'success'|'error') => void }) {
@@ -17,7 +18,9 @@ export default function Voices({ showToast }: { showToast?: (msg: string, type?:
   useEffect(() => { fetchVoices() }, [])
 
   async function fetchVoices() {
-    const { data } = await supabase.from('voices').select('*').order('created_at', { ascending: false })
+    const fid = await getFamilyId()
+    if (!fid) { setVoices([]); setLoading(false); return }
+    const { data } = await supabase.from('voices').select('*').eq('family_id', fid).order('created_at', { ascending: false })
     setVoices(data || [])
     setLoading(false)
   }
@@ -25,12 +28,13 @@ export default function Voices({ showToast }: { showToast?: (msg: string, type?:
   async function saveVoice() {
     if (!form.name) return alert("Please enter the person's name")
     if (!file) return alert('Please upload an audio file')
+    const fid = await getFamilyId()
+    if (!fid) return alert('No family selected')
     setSaving(true)
-    const ext = file.name.split('.').pop()
-    const path = `voices/${Date.now()}.${ext}`
+    const path = mediaPath(fid, 'voices', file)
     await supabase.storage.from('family-media').upload(path, file)
     const { data: urlData } = supabase.storage.from('family-media').getPublicUrl(path)
-    await supabase.from('voices').insert([{ ...form, audio_url: urlData.publicUrl }])
+    await supabase.from('voices').insert([{ ...form, audio_url: urlData.publicUrl, family_id: fid }])
     setSaving(false)
     setShowForm(false)
     setFile(null)

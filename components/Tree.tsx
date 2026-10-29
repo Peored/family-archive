@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getFamilyId } from '@/lib/family'
 
 export default function Tree() {
   const [members, setMembers] = useState<any[]>([])
@@ -10,7 +11,9 @@ export default function Tree() {
   useEffect(() => { fetchMembers() }, [])
 
   async function fetchMembers() {
-    const { data } = await supabase.from('members').select('*').order('created_at')
+    const fid = await getFamilyId()
+    if (!fid) { setMembers([]); setLoading(false); return }
+    const { data } = await supabase.from('members').select('*').eq('family_id', fid).order('created_at')
     setMembers(data || [])
     setLoading(false)
   }
