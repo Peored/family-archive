@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId, mediaPath } from '@/lib/family'
+import { signMedia } from '@/lib/media'
 import { useRole } from './RoleGuard'
 
 export default function Voices({ showToast }: { showToast?: (msg: string, type?: 'success'|'error') => void }) {
@@ -21,7 +22,7 @@ export default function Voices({ showToast }: { showToast?: (msg: string, type?:
     const fid = await getFamilyId()
     if (!fid) { setVoices([]); setLoading(false); return }
     const { data } = await supabase.from('voices').select('*').eq('family_id', fid).order('created_at', { ascending: false })
-    setVoices(data || [])
+    setVoices(await signMedia(data || [], ['audio_url']))
     setLoading(false)
   }
 

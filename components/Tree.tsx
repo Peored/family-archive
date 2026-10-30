@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId } from '@/lib/family'
+import { signMedia } from '@/lib/media'
 
 export default function Tree() {
   const [members, setMembers] = useState<any[]>([])
@@ -14,7 +15,7 @@ export default function Tree() {
     const fid = await getFamilyId()
     if (!fid) { setMembers([]); setLoading(false); return }
     const { data } = await supabase.from('members').select('*').eq('family_id', fid).order('created_at')
-    setMembers(data || [])
+    setMembers(await signMedia(data || [], ['photo_url']))
     setLoading(false)
   }
 

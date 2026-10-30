@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId, mediaPath } from '@/lib/family'
+import { signMedia } from '@/lib/media'
 import { useRole } from './RoleGuard'
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -27,7 +28,7 @@ export default function Members({ showToast }: { showToast?: (msg: string, type?
     const fid = await getFamilyId()
     if (!fid) { setMembers([]); setLoading(false); return }
     const { data } = await supabase.from('members').select('*').eq('family_id', fid).order('created_at')
-    setMembers(data || [])
+    setMembers(await signMedia(data || [], ['photo_url']))
     setLoading(false)
   }
 

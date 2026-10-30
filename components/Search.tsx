@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId } from '@/lib/family'
+import { signMedia } from '@/lib/media'
 
 export default function Search() {
   const [query, setQuery] = useState('')
@@ -21,7 +22,7 @@ export default function Search() {
       .select('*')
       .eq('family_id', fid)
       .or(`name.ilike.%${query}%,hometown.ilike.%${query}%,career.ilike.%${query}%,tribe.ilike.%${query}%,role.ilike.%${query}%,bio.ilike.%${query}%`)
-    setResults(data || [])
+    setResults(await signMedia(data || [], ['photo_url']))
     setLoading(false)
   }
 

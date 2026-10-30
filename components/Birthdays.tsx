@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId } from '@/lib/family'
+import { signMedia } from '@/lib/media'
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
@@ -22,7 +23,7 @@ export default function Birthdays() {
       .select('id, name, birth_year, photo_url, birth_month, birth_day')
       .eq('family_id', fid)
       .order('birth_month', { ascending: true })
-    setMembers(data || [])
+    setMembers(await signMedia(data || [], ['photo_url']))
     setLoading(false)
   }
 

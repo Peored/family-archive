@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId, mediaPath } from '@/lib/family'
+import { signMedia } from '@/lib/media'
 import { useRole } from './RoleGuard'
 
 export default function Photos({ showToast }: { showToast?: (msg: string, type?: 'success'|'error') => void }) {
@@ -21,7 +22,7 @@ export default function Photos({ showToast }: { showToast?: (msg: string, type?:
     const fid = await getFamilyId()
     if (!fid) { setPhotos([]); setLoading(false); return }
     const { data } = await supabase.from('photos').select('*').eq('family_id', fid).order('created_at', { ascending: false })
-    setPhotos(data || [])
+    setPhotos(await signMedia(data || [], ['url']))
     setLoading(false)
   }
 

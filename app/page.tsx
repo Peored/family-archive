@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getActiveFamily, type Family } from '@/lib/family'
+import { signMedia, clearMediaCache } from '@/lib/media'
 import { useRouter } from 'next/navigation'
 import Members from '@/components/Members'
 import Photos from '@/components/Photos'
@@ -90,6 +91,7 @@ export default function Home() {
 
   async function logout() {
     setLoading(true)
+    clearMediaCache()
     await supabase.auth.signOut()
     setSession(null)
     setEmail('')
@@ -401,9 +403,9 @@ function Dashboard() {
         supabase.from('photos').select('*').eq('family_id', fid).order('created_at', { ascending: false }).limit(4),
       ])
       setCounts({ members: mc.count||0, photos: pc.count||0, stories: sc.count||0, voices: vc.count||0 })
-      setMembers(mr.data || [])
+      setMembers(await signMedia(mr.data || [], ['photo_url']))
       setStories(sr.data || [])
-      setPhotos(pr.data || [])
+      setPhotos(await signMedia(pr.data || [], ['url']))
       setLoading(false)
     }
     load()

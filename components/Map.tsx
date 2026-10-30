@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId } from '@/lib/family'
+import { signMedia } from '@/lib/media'
 
 export default function Map() {
   const [members, setMembers] = useState<any[]>([])
@@ -18,7 +19,7 @@ export default function Map() {
       .select('id, name, hometown, photo_url, birth_year, death_year, role, generation')
       .eq('family_id', fid)
       .not('hometown', 'is', null)
-    setMembers((data || []).filter(m => m.hometown && m.hometown.trim() !== ''))
+    setMembers(await signMedia((data || []).filter(m => m.hometown && m.hometown.trim() !== ''), ['photo_url']))
     setLoading(false)
   }
 
