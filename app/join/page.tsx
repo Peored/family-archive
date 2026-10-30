@@ -192,6 +192,11 @@ function JoinInner() {
                 </button>
               </div>
             )}
+
+            <p className="mt-6 text-[#3A3020] text-xs tracking-widest">
+              BY CONTINUING YOU AGREE TO OUR{' '}
+              <a href="/privacy" target="_blank" rel="noreferrer" className="underline hover:text-[#9A8A6A]">PRIVACY &amp; TERMS</a>
+            </p>
           </>
         )}
       </div>

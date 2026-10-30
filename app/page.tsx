@@ -213,6 +213,9 @@ export default function Home() {
           {signingIn ? 'ENTERING...' : 'ENTER THE ARCHIVE'}
         </button>
         <p className="text-[#3A3020] text-xs mt-6 tracking-widest">ACCESS BY INVITATION ONLY</p>
+        <p className="mt-2">
+          <a href="/privacy" className="text-[#5A4E38] text-xs tracking-widest hover:text-[#9A8A6A]">PRIVACY &amp; TERMS</a>
+        </p>
         <div className="mt-3">
           <button
             onClick={() => router.push('/contact')}
