@@ -24,6 +24,9 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [signingIn, setSigningIn] = useState(false)
+  const [forgot, setForgot] = useState(false)
+  const [resetBusy, setResetBusy] = useState(false)
+  const [resetSent, setResetSent] = useState(false)
   const { toast, showToast } = useToast()
   const router = useRouter()
   const moreRef = useRef<HTMLDivElement>(null)
@@ -98,6 +101,18 @@ export default function Home() {
     setLoading(false)
   }
 
+  async function sendReset() {
+    if (!email) return setError('Please enter your email address')
+    setResetBusy(true)
+    setError('')
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    // Same message whether or not the email exists, so nobody can probe for accounts
+    setResetSent(true)
+    setResetBusy(false)
+  }
+
   function goTo(t: string) {
     setTab(t)
     setMenuOpen(false)
@@ -107,6 +122,50 @@ export default function Home() {
   if (loading) return (
     <main className="min-h-screen bg-[#0A0804] flex items-center justify-center">
       <p className="text-[#C9A84C] text-xs tracking-widest">LOADING...</p>
+    </main>
+  )
+
+  if (!session && forgot) return (
+    <main className="min-h-screen bg-[#0A0804] flex items-center justify-center px-4">
+      <div className="border border-[#3A3020] p-10 max-w-sm w-full text-center relative">
+        <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C9A84C]"></div>
+        <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C9A84C]"></div>
+        <p className="text-[#C9A84C] text-xs tracking-widest font-light mb-4">✦ FAMILY ARCHIVE ✦</p>
+        <h1 className="text-[#F0E6D0] text-3xl mb-2" style={{fontFamily:'Georgia,serif'}}>Reset password</h1>
+        {resetSent ? (
+          <p className="text-[#9A8A6A] text-sm italic mb-8">
+            If an account exists for <span className="text-[#C9A84C]">{email}</span>, a reset link is on its way. Check your inbox (and spam folder).
+          </p>
+        ) : (
+          <>
+            <p className="text-[#9A8A6A] text-sm italic mb-8">Enter your email and we will send you a link to choose a new password</p>
+            <input
+              className="w-full bg-[#0A0804] border border-[#3A3020] text-[#F0E6D0] px-4 py-3 mb-4 outline-none focus:border-[#C9A84C] transition-colors"
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={e => { setEmail(e.target.value); setError('') }}
+              onKeyDown={e => e.key === 'Enter' && sendReset()}
+            />
+            {error && <p className="text-red-400 text-xs mb-3">✗ {error}</p>}
+            <button
+              className="w-full bg-gradient-to-r from-[#8B6914] to-[#C9A84C] text-[#0A0804] py-3 text-xs tracking-widest hover:from-[#C9A84C] hover:to-[#E8C97A] transition-all disabled:opacity-50"
+              onClick={sendReset}
+              disabled={resetBusy}
+            >
+              {resetBusy ? 'SENDING...' : 'SEND RESET LINK'}
+            </button>
+          </>
+        )}
+        <div className="mt-6">
+          <button
+            onClick={() => { setForgot(false); setResetSent(false); setError('') }}
+            className="text-[#5A4E38] text-xs tracking-widest bg-transparent border-none cursor-pointer"
+          >
+            BACK TO SIGN IN
+          </button>
+        </div>
+      </div>
     </main>
   )
 
@@ -135,6 +194,14 @@ export default function Home() {
           onKeyDown={e => e.key === 'Enter' && login()}
         />
         {error && <p className="text-red-400 text-xs mb-3">✗ {error}</p>}
+        <div className="text-right -mt-2 mb-4">
+          <button
+            onClick={() => { setForgot(true); setError('') }}
+            className="text-[#5A4E38] text-xs tracking-widest bg-transparent border-none cursor-pointer hover:text-[#9A8A6A]"
+          >
+            FORGOT PASSWORD?
+          </button>
+        </div>
         <button
           className="w-full bg-gradient-to-r from-[#8B6914] to-[#C9A84C] text-[#0A0804] py-3 text-xs tracking-widest hover:from-[#C9A84C] hover:to-[#E8C97A] transition-all disabled:opacity-50"
           onClick={login}
