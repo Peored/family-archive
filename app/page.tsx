@@ -13,6 +13,7 @@ import Search from '@/components/Search'
 import Birthdays from '@/components/Birthdays'
 import Map from '@/components/Map'
 import Invites from '@/components/Invites'
+import People from '@/components/People'
 import { Toast, useToast } from '@/components/Toast'
 
 export default function Home() {
@@ -226,8 +227,8 @@ export default function Home() {
   )
 
   const mainTabs = ['home','members','tree','photos','stories']
-  const moreTabs = ['voices','birthdays','map','search', ...(isAdmin ? ['invite'] : [])]
-  const allMobileTabs = ['home','members','tree','photos','stories','voices','birthdays','map','search', ...(isAdmin ? ['invite'] : [])]
+  const moreTabs = ['voices','birthdays','map','search', ...(isAdmin ? ['people','invite'] : [])]
+  const allMobileTabs = ['home','members','tree','photos','stories','voices','birthdays','map','search', ...(isAdmin ? ['people','invite'] : [])]
 
   return (
     <main className="min-h-screen bg-[#0A0804] text-[#F0E6D0]">
@@ -370,6 +371,7 @@ export default function Home() {
         {tab === 'birthdays' && <Birthdays />}
         {tab === 'map'       && <Map />}
         {tab === 'search'    && <Search />}
+        {tab === 'people'    && isAdmin && <People showToast={showToast} />}
         {tab === 'invite'    && isAdmin && <Invites scope="family" showToast={showToast} />}
       </div>
 
