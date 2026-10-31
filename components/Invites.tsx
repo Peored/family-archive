@@ -46,11 +46,11 @@ export default function Invites({ scope, showToast }: Props) {
     return `${window.location.origin}/join?token=${i.token}`
   }
 
-  async function copy(i: Invite) {
+  async function copy(i: Invite, quiet = false) {
     const link = linkFor(i)
     try {
       await navigator.clipboard.writeText(link)
-      showToast?.('Invite link copied')
+      if (!quiet) showToast?.('Invite link copied')
     } catch {
       window.prompt('Copy this invite link:', link)
     }
@@ -100,12 +100,13 @@ export default function Invites({ scope, showToast }: Props) {
         if (res.ok) {
           showToast?.(`Invite emailed to ${cleanEmail}`)
         } else {
-          showToast?.('Email failed, link copied instead', 'error')
-          copy(data as Invite)
+          const body = await res.json().catch(() => ({}))
+          showToast?.(`Email failed (${res.status}${body?.error ? ': ' + body.error : ''}). Link copied.`, 'error')
+          copy(data as Invite, true)
         }
       } catch {
-        showToast?.('Email failed, link copied instead', 'error')
-        copy(data as Invite)
+        showToast?.('Email failed (network error). Link copied.', 'error')
+        copy(data as Invite, true)
       }
     } else {
       copy(data as Invite)
