@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId, mediaPath } from '@/lib/family'
 import { signMedia } from '@/lib/media'
+import { checkAudio } from '@/lib/upload'
 import { useRole } from './RoleGuard'
 
 export default function Voices({ showToast }: { showToast?: (msg: string, type?: 'success'|'error') => void }) {
@@ -29,13 +30,27 @@ export default function Voices({ showToast }: { showToast?: (msg: string, type?:
   async function saveVoice() {
     if (!form.name) return alert("Please enter the person's name")
     if (!file) return alert('Please upload an audio file')
+    try {
+      checkAudio(file)
+    } catch (e) {
+      return alert(e instanceof Error ? e.message : 'That file cannot be used.')
+    }
     const fid = await getFamilyId()
     if (!fid) return alert('No family selected')
     setSaving(true)
     const path = mediaPath(fid, 'voices', file)
-    await supabase.storage.from('family-media').upload(path, file)
+    const { error: upErr } = await supabase.storage.from('family-media').upload(path, file)
+    if (upErr) {
+      setSaving(false)
+      return alert('The upload failed. Please check your connection and try again.')
+    }
     const { data: urlData } = supabase.storage.from('family-media').getPublicUrl(path)
-    await supabase.from('voices').insert([{ ...form, audio_url: urlData.publicUrl, family_id: fid }])
+    const { error: dbErr } = await supabase.from('voices').insert([{ ...form, audio_url: urlData.publicUrl, family_id: fid }])
+    if (dbErr) {
+      await supabase.storage.from('family-media').remove([path])
+      setSaving(false)
+      return alert('Could not save the recording. Please try again.')
+    }
     setSaving(false)
     setShowForm(false)
     setFile(null)

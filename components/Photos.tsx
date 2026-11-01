@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId, mediaPath } from '@/lib/family'
 import { signMedia } from '@/lib/media'
+import { prepareImage } from '@/lib/upload'
 import { useRole } from './RoleGuard'
 
 export default function Photos({ showToast }: { showToast?: (msg: string, type?: 'success'|'error') => void }) {
@@ -38,10 +39,26 @@ export default function Photos({ showToast }: { showToast?: (msg: string, type?:
     const fid = await getFamilyId()
     if (!fid) return alert('No family selected')
     setSaving(true)
-    const path = mediaPath(fid, 'photos', file)
-    await supabase.storage.from('family-media').upload(path, file)
+    let toUpload: File
+    try {
+      toUpload = await prepareImage(file)
+    } catch (e) {
+      setSaving(false)
+      return alert(e instanceof Error ? e.message : 'Could not read that picture.')
+    }
+    const path = mediaPath(fid, 'photos', toUpload)
+    const { error: upErr } = await supabase.storage.from('family-media').upload(path, toUpload)
+    if (upErr) {
+      setSaving(false)
+      return alert('The upload failed. Please check your connection and try again.')
+    }
     const { data: urlData } = supabase.storage.from('family-media').getPublicUrl(path)
-    await supabase.from('photos').insert([{ ...form, url: urlData.publicUrl, family_id: fid }])
+    const { error: dbErr } = await supabase.from('photos').insert([{ ...form, url: urlData.publicUrl, family_id: fid }])
+    if (dbErr) {
+      await supabase.storage.from('family-media').remove([path])
+      setSaving(false)
+      return alert('Could not save the photo. Please try again.')
+    }
     setSaving(false)
     setShowForm(false)
     setFile(null)

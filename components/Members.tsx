@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId, mediaPath } from '@/lib/family'
 import { signMedia } from '@/lib/media'
+import { prepareImage } from '@/lib/upload'
 import { useRole } from './RoleGuard'
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -40,8 +41,19 @@ export default function Members({ showToast }: { showToast?: (msg: string, type?
     let photo_url = null
 
     if (photo) {
-      const path = mediaPath(fid, 'members', photo)
-      await supabase.storage.from('family-media').upload(path, photo)
+      let toUpload: File
+      try {
+        toUpload = await prepareImage(photo)
+      } catch (e) {
+        setSaving(false)
+        return alert(e instanceof Error ? e.message : 'Could not read that picture.')
+      }
+      const path = mediaPath(fid, 'members', toUpload)
+      const { error: upErr } = await supabase.storage.from('family-media').upload(path, toUpload)
+      if (upErr) {
+        setSaving(false)
+        return alert('The photo upload failed. Please check your connection and try again.')
+      }
       const { data: urlData } = supabase.storage.from('family-media').getPublicUrl(path)
       photo_url = urlData.publicUrl
     }
