@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId, mediaPath } from '@/lib/family'
-import { signMedia } from '@/lib/media'
+import { signMedia, deleteMediaFile } from '@/lib/media'
 import { prepareImage } from '@/lib/upload'
 import { useRole } from './RoleGuard'
 
@@ -70,7 +70,12 @@ export default function Photos({ showToast }: { showToast?: (msg: string, type?:
 
   async function deletePhoto(id: string) {
     if (!confirm('Remove this photo?')) return
-    await supabase.from('photos').delete().eq('id', id)
+    const photo = photos.find(p => p.id === id)
+    if (photo && !(await deleteMediaFile(photo.url))) {
+      return alert('Could not remove the photo file. Please check your connection and try again.')
+    }
+    const { error } = await supabase.from('photos').delete().eq('id', id)
+    if (error) return alert('Could not remove the photo. Please try again.')
     setLightbox(null)
     fetchPhotos()
     showToast?.('Photo removed', 'error')

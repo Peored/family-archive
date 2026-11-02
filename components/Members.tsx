@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId, mediaPath } from '@/lib/family'
-import { signMedia } from '@/lib/media'
+import { signMedia, deleteMediaFile } from '@/lib/media'
 import { prepareImage } from '@/lib/upload'
 import { useRole } from './RoleGuard'
 
@@ -65,10 +65,16 @@ export default function Members({ showToast }: { showToast?: (msg: string, type?
     }
 
     if (editingId) {
-      await supabase.from('members').update({
+      const oldPhoto = photo_url ? members.find(m => m.id === editingId)?.photo_url : null
+      const { error: updErr } = await supabase.from('members').update({
         ...payload,
         ...(photo_url ? { photo_url } : {})
       }).eq('id', editingId)
+      if (updErr) {
+        setSaving(false)
+        return alert('Could not save the changes. Please try again.')
+      }
+      if (oldPhoto) await deleteMediaFile(oldPhoto) // replaced picture: free the old file
       setEditingId(null)
       showToast?.('Member updated successfully')
     } else {
@@ -110,7 +116,12 @@ export default function Members({ showToast }: { showToast?: (msg: string, type?
 
   async function deleteMember(id: string) {
     if (!confirm('Remove this member?')) return
-    await supabase.from('members').delete().eq('id', id)
+    const member = members.find(m => m.id === id)
+    if (member && !(await deleteMediaFile(member.photo_url))) {
+      return alert('Could not remove the photo file. Please check your connection and try again.')
+    }
+    const { error } = await supabase.from('members').delete().eq('id', id)
+    if (error) return alert('Could not remove this member. Please try again.')
     setSelected(null)
     fetchMembers()
     showToast?.('Member removed from archive', 'error')

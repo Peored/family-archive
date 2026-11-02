@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getFamilyId, mediaPath } from '@/lib/family'
-import { signMedia } from '@/lib/media'
+import { signMedia, deleteMediaFile } from '@/lib/media'
 import { checkAudio } from '@/lib/upload'
 import { useRole } from './RoleGuard'
 
@@ -61,7 +61,12 @@ export default function Voices({ showToast }: { showToast?: (msg: string, type?:
 
   async function deleteVoice(id: string) {
     if (!confirm('Remove this recording?')) return
-    await supabase.from('voices').delete().eq('id', id)
+    const voice = voices.find(v => v.id === id)
+    if (voice && !(await deleteMediaFile(voice.audio_url))) {
+      return alert('Could not remove the recording file. Please check your connection and try again.')
+    }
+    const { error } = await supabase.from('voices').delete().eq('id', id)
+    if (error) return alert('Could not remove the recording. Please try again.')
     fetchVoices()
     showToast?.('Recording removed', 'error')
   }

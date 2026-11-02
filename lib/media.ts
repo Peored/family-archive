@@ -53,6 +53,19 @@ export async function signMedia<T extends Record<string, any>>(rows: T[], fields
   })
 }
 
+/**
+ * Deletes the stored file behind a media URL or path. Call this BEFORE deleting
+ * the database row that points at it (older files can only be deleted while
+ * a row still references them). Returns false if storage reported an error.
+ */
+export async function deleteMediaFile(value?: string | null): Promise<boolean> {
+  const path = mediaPathFromUrl(value)
+  if (!path) return true
+  const { error } = await supabase.storage.from(BUCKET).remove([path])
+  cache.delete(path)
+  return !error
+}
+
 /** Forget cached links (call on sign-out). */
 export function clearMediaCache() {
   cache.clear()
