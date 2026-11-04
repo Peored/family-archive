@@ -384,8 +384,9 @@ export default function Home() {
 }
 
 function Dashboard() {
-  const [counts, setCounts] = useState({ members:0, photos:0, stories:0, voices:0 })
+  const [counts, setCounts] = useState({ members:0, ancestors:0, photos:0, stories:0, voices:0 })
   const [members, setMembers] = useState<any[]>([])
+  const [ancestors, setAncestors] = useState<any[]>([])
   const [stories, setStories] = useState<any[]>([])
   const [photos, setPhotos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -398,17 +399,23 @@ function Dashboard() {
       if (!active) { setLoading(false); return }
       const fid = active.family.id
       setFamily(active.family)
-      const [mc, pc, sc, vc, mr, sr, pr] = await Promise.all([
-        supabase.from('members').select('id', { count: 'exact', head: true }).eq('family_id', fid),
+      const [pc, sc, vc, mr, sr, pr] = await Promise.all([
         supabase.from('photos').select('id', { count: 'exact', head: true }).eq('family_id', fid),
         supabase.from('stories').select('id', { count: 'exact', head: true }).eq('family_id', fid),
         supabase.from('voices').select('id', { count: 'exact', head: true }).eq('family_id', fid),
-        supabase.from('members').select('*').eq('family_id', fid).order('created_at', { ascending: false }).limit(3),
+        // Everyone in the family, newest first; split into living members and ancestors below.
+        supabase.from('members').select('*').eq('family_id', fid).order('created_at', { ascending: false }),
         supabase.from('stories').select('*').eq('family_id', fid).order('created_at', { ascending: false }).limit(3),
         supabase.from('photos').select('*').eq('family_id', fid).order('created_at', { ascending: false }).limit(4),
       ])
-      setCounts({ members: mc.count||0, photos: pc.count||0, stories: sc.count||0, voices: vc.count||0 })
-      setMembers(await signMedia(mr.data || [], ['photo_url']))
+      // A blank death year is saved as '' (not null), so treat both as "still living".
+      const hasPassed = (m: any) => String(m.death_year ?? '').trim() !== ''
+      const everyone = mr.data || []
+      const living = everyone.filter(m => !hasPassed(m))
+      const passed = everyone.filter(hasPassed)
+      setCounts({ members: living.length, ancestors: passed.length, photos: pc.count||0, stories: sc.count||0, voices: vc.count||0 })
+      setMembers(await signMedia(living.slice(0, 3), ['photo_url']))
+      setAncestors(await signMedia(passed.slice(0, 3), ['photo_url']))
       setStories(sr.data || [])
       setPhotos(await signMedia(pr.data || [], ['url']))
       setLoading(false)
@@ -417,7 +424,8 @@ function Dashboard() {
   }, [])
 
   const stats = [
-    { label:'Ancestors',   value:counts.members, icon:'👤' },
+    { label:'Members',     value:counts.members,   icon:'👤' },
+    { label:'Ancestors',   value:counts.ancestors, icon:'🕯' },
     { label:'Photographs', value:counts.photos,  icon:'📷' },
     { label:'Stories',     value:counts.stories, icon:'📜' },
     { label:'Voices',      value:counts.voices,  icon:'🎙' },
@@ -442,9 +450,9 @@ function Dashboard() {
         <p className="text-[#9A8A6A] italic text-lg">{family?.tagline || 'A living record of our blood, our stories, our faces.'}</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-        {stats.map(s => (
-          <div key={s.label} className="border border-[#2A2218] bg-[#110E08] p-6 text-center">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
+        {stats.map((s, i) => (
+          <div key={s.label} className={`border border-[#2A2218] bg-[#110E08] p-6 text-center ${i === stats.length - 1 ? 'col-span-2 md:col-span-1' : ''}`}>
             <p className="text-3xl mb-3">{s.icon}</p>
             <p className="text-[#C9A84C] text-3xl font-light mb-1" style={{fontFamily:'Georgia,serif'}}>{s.value}</p>
             <p className="text-[#5A4E38] text-xs tracking-widest">{s.label.toUpperCase()}</p>
@@ -472,6 +480,24 @@ function Dashboard() {
         </div>
 
         <div>
+          <p className="text-[#C9A84C] text-xs tracking-widest mb-4 border-b border-[#2A2218] pb-2">RECENTLY ADDED ANCESTORS</p>
+          {!ancestors.length
+            ? <p className="text-[#5A4E38] text-sm italic">No ancestors yet</p>
+            : ancestors.map(m => (
+              <div key={m.id} className="flex gap-3 items-center mb-3 border border-[#2A2218] p-3 bg-[#110E08]">
+                {m.photo_url
+                  ? <img src={m.photo_url} className="w-10 h-10 object-cover border border-[#3A3020]"/>
+                  : <div className="w-10 h-10 bg-[#16120C] flex items-center justify-center text-lg border border-[#2A2218]">👤</div>}
+                <div>
+                  <p className="text-[#F0E6D0] text-sm" style={{fontFamily:'Georgia,serif'}}>{m.name}</p>
+                  <p className="text-[#5A4E38] text-xs italic">{m.generation ? m.generation + ' · ' : ''}{m.birth_year || '?'} – {m.death_year}</p>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+
+        <div className="col-span-1 md:col-span-2">
           <p className="text-[#C9A84C] text-xs tracking-widest mb-4 border-b border-[#2A2218] pb-2">RECENTLY ADDED STORIES</p>
           {!stories.length
             ? <p className="text-[#5A4E38] text-sm italic">No stories yet</p>
